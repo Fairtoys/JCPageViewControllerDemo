@@ -1,0 +1,2 @@
+# JCPageViewControllerDemo
+仿UIPageViewController,因为UIPageViewController有Bug，所以自己写一个来用用，哪里有问题都好改
