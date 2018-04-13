@@ -115,12 +115,7 @@
             
             return theView;
         }];
-        [_scrollView setSelectedViewDidApearBlock:^(JCPageScrollView * _Nonnull thePageScrollView, __kindof UIView * _Nonnull selectedView) {
-            NSLog(@"viewDid appear%@", @(selectedView.tag));
-        }];
-        [_scrollView setSelectedViewDidDisapearBlock:^(JCPageScrollView * _Nonnull thePageScrollView, __kindof UIView * _Nonnull selectedView) {
-            NSLog(@"viewDid disappear%@", @(selectedView.tag));
-        }];
+
     }
     return _scrollView;
 }

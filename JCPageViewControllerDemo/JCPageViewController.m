@@ -16,6 +16,9 @@
 
 @property (nonatomic, strong) NSMutableDictionary <NSNumber *, UIViewController *> * viewControllerMap;
 
+@property (nonatomic, assign, getter = isPageViewDidViewAppeared) BOOL pageViewDidViewAppeared;
+
+@property (nonatomic, assign, getter = isNeedInvokeSelectVCAppearenceMethods) BOOL needInvokeSelectVCAppearenceMethods;
 @end
 
 @implementation JCPageViewController
@@ -42,26 +45,36 @@
     }];
     UIGestureRecognizer *gesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(onPanGes:)];
     [self.view addGestureRecognizer:gesture];
+    
+    UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
+    [self.view addSubview:btn];
+    [btn addTarget:self action:@selector(onClickBtn) forControlEvents:UIControlEventTouchUpInside];
 }
 
-//- (void)viewWillAppear:(BOOL)animated{
-//    [super viewWillAppear:animated];
-//    [self.selectedViewController beginAppearanceTransition:YES animated:animated];
-//}
-//- (void)viewDidAppear:(BOOL)animated{
-//    [super viewDidAppear:animated];
-//    [self.selectedViewController endAppearanceTransition];
-//}
-//
-//- (void)viewWillDisappear:(BOOL)animated{
-//    [super viewWillDisappear:animated];
-//    [self.selectedViewController beginAppearanceTransition:NO animated:animated];
-//}
-//
-//- (void)viewDidDisappear:(BOOL)animated{
-//    [super viewDidDisappear:animated];
-//    [self.selectedViewController endAppearanceTransition];
-//}
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    if (self.isNeedInvokeSelectVCAppearenceMethods) {
+        [self.selectedViewController beginAppearanceTransition:YES animated:animated];
+    }
+    
+}
+- (void)viewDidAppear:(BOOL)animated{
+    [super viewDidAppear:animated];
+    if (self.isNeedInvokeSelectVCAppearenceMethods) {
+        [self.selectedViewController endAppearanceTransition];
+    }
+    self.needInvokeSelectVCAppearenceMethods = YES;
+}
+
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [self.selectedViewController beginAppearanceTransition:NO animated:animated];
+}
+
+- (void)viewDidDisappear:(BOOL)animated{
+    [super viewDidDisappear:animated];
+    [self.selectedViewController endAppearanceTransition];
+}
 
 - (void)onPanGes:(UIPanGestureRecognizer *)sender{
     NSLog(@"onPanGes");
@@ -82,8 +95,9 @@
         [_selectedViewController willMoveToParentViewController:nil];
         [self addChildViewController:selectedViewController];
         self.scrollView.selectedView = selectedViewController.view;
-        //    [_selectedViewController.view removeFromSuperview];
         [_selectedViewController removeFromParentViewController];
+        
+        self.needInvokeSelectVCAppearenceMethods = NO;
     }
     
 
@@ -126,19 +140,6 @@
             return nil;
             
         }];
-//        [_scrollView setSelectedViewDidApearBlock:^(JCPageScrollView * _Nonnull thePageScrollView, __kindof UIView * _Nonnull selectedView) {
-//            NSLog(@"viewDid appear%@", @(selectedView.tag));
-//            UIViewController *controller = [weakSelf controllerForView:selectedView];
-//            [weakSelf addChildViewController:controller];
-//            [controller didMoveToParentViewController:weakSelf];
-//
-//        }];
-//        [_scrollView setSelectedViewDidDisapearBlock:^(JCPageScrollView * _Nonnull thePageScrollView, __kindof UIView * _Nonnull selectedView) {
-//            NSLog(@"viewDid disappear%@", @(selectedView.tag));
-//            UIViewController *controller = [weakSelf controllerForView:selectedView];
-//            [controller willMoveToParentViewController:nil];
-//            [controller removeFromParentViewController];
-//        }];
         
         [_scrollView setViewWillTransitionBlock:^(__kindof JCPageScrollView * _Nonnull thePageScrollView, __kindof UIView * _Nonnull fromView, __kindof UIView * _Nonnull toView) {
             UIViewController *fromController = [weakSelf controllerForView:fromView];
@@ -148,8 +149,6 @@
         }];
         
         [_scrollView setViewDidTransitionBlock:^(__kindof JCPageScrollView * _Nonnull thePageScrollView, __kindof UIView * _Nonnull fromView, __kindof UIView * _Nonnull toView) {
-           
-  
             
             UIViewController *fromController = [weakSelf controllerForView:fromView];
             UIViewController *toController = [weakSelf controllerForView:toView];
@@ -160,21 +159,23 @@
             [fromController removeFromParentViewController];
             [weakSelf setSelectedViewController:toController beginAppearenceTransitions:NO];
             [toController didMoveToParentViewController:weakSelf];
-//            [toController endAppearanceTransition];
+//            [toController endAppearanceTransition];//这个不需要了，因为在滚动停止时才需要调用此方法，但是上一个缺需要在此时调用此方法来触发viewDidDisappear方法
             [fromController endAppearanceTransition];
             
             
         }];
         
         [_scrollView setScrollDidEndBlock:^(__kindof JCPageScrollView * _Nonnull thePageScrollView, __kindof UIView * _Nonnull fromView, __kindof UIView * _Nonnull toView, BOOL isTransitionComplete) {
-            if (!fromView) {
+            if (!fromView) {//没有fromView，说明没有发生切换动作，故直接返回
                 return ;
             }
             UIViewController *fromController = [weakSelf controllerForView:fromView];
             UIViewController *toController = [weakSelf controllerForView:toView];
             if (isTransitionComplete) {
+                //这里发生了切换，只需要调用完成方法来调用viewDidAppear
                 [toController endAppearanceTransition];
             }else{
+                //重新调用当前VC的viewWillAppear和viewDidAppear等
                 [toController beginAppearanceTransition:YES animated:YES];
                 [fromController beginAppearanceTransition:NO animated:YES];
                 [fromController endAppearanceTransition];
@@ -182,6 +183,12 @@
             }
             
         }];
+        
+        //要移除掉该View对应的Controller
+        [_scrollView setViewDidRemoveFromSuperViewBlock:^(__kindof JCPageScrollView * _Nonnull thePageScrollView, __kindof UIView * _Nonnull selectedView) {
+            [weakSelf removeViewControllerForView:selectedView];
+        }];
+
         
     }
     return _scrollView;
@@ -202,6 +209,10 @@
 
 - (void)mapController:(UIViewController *)controller{
     [self mapController:controller forView:controller.view];
+}
+
+- (void)removeViewControllerForView:(UIView *)view{
+    [self.viewControllerMap removeObjectForKey:@(view.hash)];
 }
 
 - (void)onScrollViewPan:(UIPanGestureRecognizer *)panGes{

@@ -58,4 +58,8 @@
 //    return [super shouldAutorotate];
 //}
 
+- (void)dealloc{
+    NSLog(@"self %@, tag:%@  %@", self, @(self.view.tag), NSStringFromSelector(_cmd));
+}
+
 @end

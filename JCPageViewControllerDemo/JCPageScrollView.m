@@ -11,30 +11,28 @@
 
 @interface JCPageScrollView () <UIScrollViewDelegate>
 
-@property (nonatomic, strong) NSArray <UIView *> *containerViews;
+@property (nonatomic, strong) NSArray <UIView *> *containerViews;//有三个视图容器，初始化ScrollView时就创建好
 
-@property (nonatomic, readonly) UIView *selectedViewContainerView;
+@property (nonatomic, readonly) UIView *selectedViewContainerView;//当中的View的ContainerView
 
-@property (nonatomic, readonly) UIView *beforeViewContainerView;
+@property (nonatomic, readonly) UIView *beforeViewContainerView;//最前面的容器
 
-@property (nonatomic, readonly) UIView *afterViewContainerView;
+@property (nonatomic, readonly) UIView *afterViewContainerView;//最后面的容器
 
 @property (nonatomic, weak) id<UIScrollViewDelegate> theDelegate;
 
-@property (nonatomic, assign, getter = isNeedLoadAfterView) BOOL needLoadAfterView;
+@property (nonatomic, assign, getter = isNeedLoadAfterView) BOOL needLoadAfterView;//用来限制是否需要加载下一个View
 
-@property (nonatomic, assign, getter = isNeedLoadBeforeView) BOOL needLoadBeforeView;
+@property (nonatomic, assign, getter = isNeedLoadBeforeView) BOOL needLoadBeforeView;//用来限制是否需要加载上一个View
 
-@property (nonatomic, strong) UIView *beforeView;
-@property (nonatomic, strong) UIView *afterView;
+@property (nonatomic, strong, nullable) UIView *beforeView;
+@property (nonatomic, strong, nullable) UIView *afterView;
 
-@property (nonatomic, assign) BOOL setuped;
+@property (nonatomic, assign) BOOL setuped;//用来判断是否初始化过ScrollView的offset了，只有创建ScrollView的时候才有用，一次性属性
 
-@property (nonatomic, assign, getter = isEnableViewWillTransitionBlock) BOOL enableViewWillTransitionBlock;
+@property (nonatomic, weak, nullable) UIView *transitioningView;//当前正在切换的视图
 
-@property (nonatomic, weak, nullable) UIView *transitioningView;
-
-@property (nonatomic, assign, getter = isTransitionComplete) BOOL transitionComplete;
+@property (nonatomic, assign, getter = isTransitionComplete) BOOL transitionComplete;//当前切换是否完成了，给Controller使用的，controller需要重新调用划走的VC的appearmethods
 
 @end
 
@@ -63,9 +61,7 @@
 }
 
 - (void)setupContainerViews{
-    self.needLoadAfterView = YES;
-    self.needLoadBeforeView = YES;
-    self.enableViewWillTransitionBlock = YES;
+    [self _resetData];
     [super setDelegate:self];
     [self.containerViews enumerateObjectsUsingBlock:^(UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [self addSubview:obj];
@@ -98,9 +94,9 @@
 - (UIView *)beforeViewContainerView{
     return self.containerViews.firstObject;
 }
-
+static const NSInteger kSelectedIdx = 1;
 - (UIView *)selectedViewContainerView{
-    return self.containerViews[1];
+    return [self containerViewAtIndex:kSelectedIdx];
 }
 
 - (UIView *)afterViewContainerView{
@@ -121,6 +117,10 @@
 }
 
 - (void)setSelectedView:(UIView *)selectedView{
+    [self setSelectedView:selectedView resetData:YES];
+}
+
+- (void)setSelectedView:(UIView *)selectedView resetData:(BOOL)resetData{
     [_selectedView removeFromSuperview];
     _selectedView = selectedView;
     [self.selectedViewContainerView addSubview:selectedView];
@@ -133,6 +133,18 @@
         self.contentInset = UIEdgeInsetsMake(0, 0, 0, 0);
     }
     
+    if (resetData) {
+        [self _resetData];
+    }
+}
+
+- (void)_resetData{
+    self.needLoadAfterView = YES;
+    self.needLoadBeforeView = YES;
+    self.transitionComplete = YES;
+    self.transitioningView = nil;
+    self.beforeView = nil;
+    self.afterView = nil;
 }
 
 - (void)setAfterView:(UIView *)afterView{
@@ -178,13 +190,12 @@
         }
         
         if (self.afterView) {
-            if (self.isEnableViewWillTransitionBlock) {//调用一次就不调了
-                self.enableViewWillTransitionBlock = NO;
+            if (self.isTransitionComplete) {//调用一次就不调了
+                self.transitionComplete = NO;
                 self.transitioningView = self.afterView;
                 if (self.viewWillTransitionBlock) {
                     self.viewWillTransitionBlock(self, self.selectedView, self.afterView);
                 }
-                self.transitionComplete = NO;
             }
 
         }
@@ -214,13 +225,12 @@
         }
         
         if (self.beforeView) {
-            if (self.isEnableViewWillTransitionBlock) {//调用一次就不调了
-                self.enableViewWillTransitionBlock = NO;
+            if (self.isTransitionComplete) {//调用一次就不调了
+                self.transitionComplete = NO;
                 self.transitioningView = self.beforeView;
                 if (self.viewWillTransitionBlock) {
                     self.viewWillTransitionBlock(self, self.selectedView, self.beforeView);
                 }
-                self.transitionComplete = NO;
             }
         }
         
@@ -231,21 +241,26 @@
 //        NSLog(@"滑出下一个");
         self.needLoadAfterView = YES;
         self.needLoadBeforeView = NO;//因为上一个还在视图中，所以不需要加载新的视图
-        self.enableViewWillTransitionBlock = YES;
         self.transitionComplete = YES;
         [_afterView removeFromSuperview];
         [_beforeView removeFromSuperview];
         [_selectedView removeFromSuperview];
 
+        //AfterView不需要了，移除
+        if (self.viewDidRemoveFromSuperViewBlock) {
+            self.viewDidRemoveFromSuperViewBlock(self, _beforeView);
+        }
+        
         _beforeView = nil;
         self.beforeView = self.selectedView;
         
         _selectedView = nil;
-        self.selectedView = self.afterView;
-
+        [self setSelectedView:self.afterView resetData:NO];
         if (self.viewDidTransitionBlock) {
             self.viewDidTransitionBlock(self, self.beforeView, self.selectedView);
         }
+        
+
         
         _afterView = nil;
     }
@@ -254,23 +269,28 @@
 //        NSLog(@"下拉上一个");
         self.needLoadBeforeView = YES;
         self.needLoadAfterView = NO;//因为上一个还在视图中，所以不需要加载新的视图
-        self.enableViewWillTransitionBlock = YES;
         self.transitionComplete = YES;
         [_beforeView removeFromSuperview];
         [_selectedView removeFromSuperview];
         [_afterView removeFromSuperview];
         
+        //BeforeView不需要了，移除
+        if (self.viewDidRemoveFromSuperViewBlock) {
+            self.viewDidRemoveFromSuperViewBlock(self, _afterView);
+        }
+        
         _afterView = nil;
         self.afterView = self.selectedView;
         
-
         _selectedView = nil;
-        self.selectedView = self.beforeView;
+        [self setSelectedView:self.beforeView resetData:NO];
         
         if (self.viewDidTransitionBlock) {
             self.viewDidTransitionBlock(self, self.afterView, self.selectedView);
         }
         
+
+
         _beforeView = nil;
     }
     
@@ -285,8 +305,7 @@
     if (self.scrollDidEndBlock) {
         self.scrollDidEndBlock(self, self.transitioningView, self.selectedView, self.isTransitionComplete);
     }
-    self.transitionComplete = NO;
-    self.enableViewWillTransitionBlock = YES;
+    self.transitionComplete = YES;
     self.transitioningView = nil;
     
     if ([self.theDelegate respondsToSelector:_cmd]) {
