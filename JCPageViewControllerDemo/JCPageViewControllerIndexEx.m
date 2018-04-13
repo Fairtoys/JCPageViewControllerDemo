@@ -139,9 +139,8 @@
     }
     
     viewController.selectedIndexForPage = selectedIndex;
-    UIViewController *selectedViewController = self.selectedViewController;
     
-    self.selectedViewController = selectedViewController;
+    self.selectedViewController = viewController;
 }
 
 

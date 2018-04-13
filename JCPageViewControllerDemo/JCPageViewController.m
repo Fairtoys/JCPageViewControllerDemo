@@ -180,6 +180,11 @@
             if (isTransitionComplete) {
                 //这里发生了切换，只需要调用完成方法来调用viewDidAppear
                 [toController endAppearanceTransition];
+                
+                //真的发生了切换的回调
+                if (weakSelf.controllerDidTransitionBlock) {
+                    weakSelf.controllerDidTransitionBlock(weakSelf, fromController, toController);
+                }
             }else{
                 //重新调用当前VC的viewWillAppear和viewDidAppear等
                 [toController beginAppearanceTransition:YES animated:YES];

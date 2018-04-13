@@ -11,6 +11,7 @@
 #import "JCPageViewController.h"
 #import "JCPageViewControllerDemo.h"
 #import "ItemViewController.h"
+#import "JCPageViewControllerIndexEx.h"
 
 @interface ViewController ()
 
@@ -67,6 +68,26 @@
     
 }
 
+- (IBAction)onClickPageIndex:(id)sender {
+    
+    JCPageViewControllerIndexEx *pageViewController = [[JCPageViewControllerIndexEx alloc] init];
+    
+    [pageViewController setViewControllerAtIndexBlock:^__kindof UIViewController * _Nonnull(__kindof JCPageViewController * _Nonnull thePageViewController, NSInteger idx) {
+        ItemViewController *vc = [[ItemViewController alloc] init];
+        vc.view.tag = idx;
+        vc.label.text = [NSString stringWithFormat:@"%@", @(vc.view.tag)];
+        return vc;
+    }];
+    
+    [pageViewController setViewControllerCountBlock:^NSInteger(__kindof JCPageViewController * _Nonnull thePageViewController) {
+        return 20;
+    }];
+    
+    pageViewController.selectedIndex = 0;
+    
+    [self presentViewController:pageViewController animated:YES completion:NULL];
+    
+}
 
 
 

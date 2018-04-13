@@ -32,11 +32,20 @@
                                     <action selector="onClickControllerBtn:" destination="BYZ-38-t0r" eventType="touchUpInside" id="KKc-mg-pMB"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Kcu-fj-UFo">
+                                <rect key="frame" x="135" y="463" width="105" height="30"/>
+                                <state key="normal" title="ControllerIndex"/>
+                                <connections>
+                                    <action selector="onClickPageIndex:" destination="BYZ-38-t0r" eventType="touchUpInside" id="54a-Xj-WSz"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
+                            <constraint firstItem="Kcu-fj-UFo" firstAttribute="top" secondItem="ihw-tK-BI1" secondAttribute="bottom" constant="32" id="HRM-lR-czm"/>
                             <constraint firstItem="HFk-JS-UYA" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="PnW-Bm-YWi"/>
                             <constraint firstItem="ihw-tK-BI1" firstAttribute="top" secondItem="HFk-JS-UYA" secondAttribute="bottom" constant="52.5" id="U8U-DL-zC9"/>
+                            <constraint firstItem="Kcu-fj-UFo" firstAttribute="centerX" secondItem="ihw-tK-BI1" secondAttribute="centerX" id="cFh-XL-mbb"/>
                             <constraint firstItem="ihw-tK-BI1" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="k01-TA-htL"/>
                             <constraint firstItem="HFk-JS-UYA" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="yzT-3F-srR"/>
                         </constraints>
