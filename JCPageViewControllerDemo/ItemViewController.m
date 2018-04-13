@@ -7,6 +7,8 @@
 //
 
 #import "ItemViewController.h"
+#import "JCPageViewController.h"
+
 
 @interface ItemViewController ()
 
@@ -41,6 +43,12 @@
 - (void)viewDidDisappear:(BOOL)animated{
     [super viewDidDisappear:animated];
     NSLog(@"self %@, tag:%@  %@", self, @(self.view.tag), NSStringFromSelector(_cmd));
+}
+- (IBAction)onClickBtn:(id)sender {
+    ItemViewController *vc = [[ItemViewController alloc] init];
+    vc.view.tag = 0;
+    vc.label.text = [NSString stringWithFormat:@"%@", @(vc.view.tag)];
+    [self.jc_thePageViewController setSelectedViewController:vc];
 }
 
 //- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator{

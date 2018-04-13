@@ -59,7 +59,7 @@
 
     
     ItemViewController *vc = [[ItemViewController alloc] init];
-    vc.view.tag = 10;
+    vc.view.tag = 0;
     vc.label.text = [NSString stringWithFormat:@"%@", @(vc.view.tag)];
     [pageViewController setSelectedViewController:vc];
     

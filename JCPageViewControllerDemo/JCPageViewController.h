@@ -24,4 +24,11 @@ typedef  UIViewController * _Nullable  (^JCPageViewControllerControllerGetBlock)
 
 @end
 
+@interface UIViewController (JCPageViewController)
+
+@property (nonatomic, readonly, nullable) __kindof JCPageViewController *jc_thePageViewController;//从当前中查找PageViewController
+
+@end
+
+
 NS_ASSUME_NONNULL_END

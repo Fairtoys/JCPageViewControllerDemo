@@ -82,16 +82,21 @@
 
 - (void)setSelectedViewController:(__kindof UIViewController *)selectedViewController{
 
-    [self setSelectedViewController:selectedViewController beginAppearenceTransitions:YES];
+    [self setSelectedViewController:selectedViewController reloadData:YES];
     
 }
 
-- (void)setSelectedViewController:(__kindof UIViewController *)selectedViewController beginAppearenceTransitions:(BOOL)beginAppearenceTransitions{
+- (void)setSelectedViewController:(__kindof UIViewController *)selectedViewController reloadData:(BOOL)reloadData{
+    
+    if (reloadData) {
+         [self.viewControllerMap removeAllObjects];//移除所有的ViewController
+    }
+    
     UIViewController *lastViewContorller = _selectedViewController;
     [self mapController:selectedViewController];
-    if (beginAppearenceTransitions) {
-        [lastViewContorller beginAppearanceTransition:NO animated:YES];
+    if (reloadData) {
         [selectedViewController beginAppearanceTransition:YES animated:YES];
+        [lastViewContorller beginAppearanceTransition:NO animated:YES];
         [_selectedViewController willMoveToParentViewController:nil];
         [self addChildViewController:selectedViewController];
         self.scrollView.selectedView = selectedViewController.view;
@@ -103,10 +108,11 @@
 
     _selectedViewController = selectedViewController;
     
-    if (beginAppearenceTransitions) {
+    if (reloadData) {
         [selectedViewController didMoveToParentViewController:self];
         [lastViewContorller endAppearanceTransition];
         [selectedViewController endAppearanceTransition]; //系统的是下一个的DidAppear先回调，再调用上一个的DidDisappear，这里我改成了先调上一个的DidDisapear,再调当前的DidAppear
+        
     }
 }
 
@@ -157,7 +163,7 @@
             [fromController willMoveToParentViewController:nil];
             [weakSelf addChildViewController:toController];
             [fromController removeFromParentViewController];
-            [weakSelf setSelectedViewController:toController beginAppearenceTransitions:NO];
+            [weakSelf setSelectedViewController:toController reloadData:NO];
             [toController didMoveToParentViewController:weakSelf];
 //            [toController endAppearanceTransition];//这个不需要了，因为在滚动停止时才需要调用此方法，但是上一个缺需要在此时调用此方法来触发viewDidDisappear方法
             [fromController endAppearanceTransition];
@@ -244,6 +250,16 @@
 }
 
 
+@end
+
+@implementation UIViewController (JCPageViewController)
+- (JCPageViewController *)jc_thePageViewController{
+    UIViewController *parentViewController = self.parentViewController;
+    while (parentViewController && ![parentViewController isKindOfClass:[JCPageViewController class]]) {
+        parentViewController = parentViewController.parentViewController;
+    }
+    return (JCPageViewController *)parentViewController;
+}
 @end
 
 

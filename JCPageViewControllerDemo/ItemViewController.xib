@@ -27,11 +27,20 @@
                     <nil key="textColor"/>
                     <nil key="highlightedColor"/>
                 </label>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="EqC-aM-Rsa">
+                    <rect key="frame" x="164" y="369" width="46" height="30"/>
+                    <state key="normal" title="Button"/>
+                    <connections>
+                        <action selector="onClickBtn:" destination="-1" eventType="touchUpInside" id="PXB-Al-3sP"/>
+                    </connections>
+                </button>
             </subviews>
             <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <constraints>
+                <constraint firstItem="EqC-aM-Rsa" firstAttribute="top" secondItem="VXu-Su-mLA" secondAttribute="bottom" constant="25" id="4YQ-if-gy8"/>
                 <constraint firstItem="VXu-Su-mLA" firstAttribute="centerY" secondItem="i5M-Pr-FkT" secondAttribute="centerY" id="Ewx-rX-Pc8"/>
                 <constraint firstItem="VXu-Su-mLA" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="JvZ-1M-fEg"/>
+                <constraint firstItem="EqC-aM-Rsa" firstAttribute="centerX" secondItem="VXu-Su-mLA" secondAttribute="centerX" id="MDG-Vd-kOI"/>
             </constraints>
             <viewLayoutGuide key="safeArea" id="Q5M-cg-NOt"/>
         </view>
