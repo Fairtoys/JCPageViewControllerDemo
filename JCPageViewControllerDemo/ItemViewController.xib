@@ -12,6 +12,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="ItemViewController">
             <connections>
+                <outlet property="imageView" destination="Q9b-Rt-USR" id="Tyd-Yz-SKq"/>
                 <outlet property="label" destination="VXu-Su-mLA" id="SiO-G9-APZ"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
             </connections>
@@ -21,6 +22,9 @@
             <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Q9b-Rt-USR">
+                    <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                </imageView>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VXu-Su-mLA">
                     <rect key="frame" x="166.5" y="323" width="42" height="21"/>
                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
@@ -34,13 +38,26 @@
                         <action selector="onClickBtn:" destination="-1" eventType="touchUpInside" id="PXB-Al-3sP"/>
                     </connections>
                 </button>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="uRR-NR-bmL">
+                    <rect key="frame" x="167.5" y="407" width="39" height="30"/>
+                    <state key="normal" title="Close"/>
+                    <connections>
+                        <action selector="onClickCloseBtn:" destination="-1" eventType="touchUpInside" id="t01-SW-ASG"/>
+                    </connections>
+                </button>
             </subviews>
             <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <constraints>
                 <constraint firstItem="EqC-aM-Rsa" firstAttribute="top" secondItem="VXu-Su-mLA" secondAttribute="bottom" constant="25" id="4YQ-if-gy8"/>
+                <constraint firstItem="uRR-NR-bmL" firstAttribute="centerX" secondItem="EqC-aM-Rsa" secondAttribute="centerX" id="5TN-6L-wvj"/>
                 <constraint firstItem="VXu-Su-mLA" firstAttribute="centerY" secondItem="i5M-Pr-FkT" secondAttribute="centerY" id="Ewx-rX-Pc8"/>
                 <constraint firstItem="VXu-Su-mLA" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="JvZ-1M-fEg"/>
                 <constraint firstItem="EqC-aM-Rsa" firstAttribute="centerX" secondItem="VXu-Su-mLA" secondAttribute="centerX" id="MDG-Vd-kOI"/>
+                <constraint firstItem="Q5M-cg-NOt" firstAttribute="bottom" secondItem="Q9b-Rt-USR" secondAttribute="bottom" id="Njz-Cw-cx1"/>
+                <constraint firstItem="uRR-NR-bmL" firstAttribute="top" secondItem="EqC-aM-Rsa" secondAttribute="bottom" constant="8" id="O6G-z2-ZXD"/>
+                <constraint firstItem="Q9b-Rt-USR" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" id="XTO-GH-OJr"/>
+                <constraint firstItem="Q9b-Rt-USR" firstAttribute="leading" secondItem="Q5M-cg-NOt" secondAttribute="leading" id="XZf-3h-A69"/>
+                <constraint firstItem="Q5M-cg-NOt" firstAttribute="trailing" secondItem="Q9b-Rt-USR" secondAttribute="trailing" id="raB-kr-cpK"/>
             </constraints>
             <viewLayoutGuide key="safeArea" id="Q5M-cg-NOt"/>
         </view>

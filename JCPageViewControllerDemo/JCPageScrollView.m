@@ -8,6 +8,7 @@
 
 #import "JCPageScrollView.h"
 #import <Masonry.h>
+#import <objc/runtime.h>
 
 @interface JCPageScrollView () <UIScrollViewDelegate>
 
@@ -33,6 +34,10 @@
 @property (nonatomic, weak, nullable) UIView *transitioningView;//当前正在切换的视图
 
 @property (nonatomic, assign, getter = isTransitionComplete) BOOL transitionComplete;//当前切换是否完成了，给Controller使用的，controller需要重新调用划走的VC的appearmethods
+
+#pragma mark 重用
+
+@property (nonatomic, strong) NSMutableDictionary <NSString *, NSMutableSet <UIView *> *> * reusableViews;
 
 @end
 
@@ -129,6 +134,29 @@ static const NSInteger kSelectedIdx = 1;
 - (UIView *)containerViewAtIndex:(NSInteger)index{
     return self.containerViews[index];
 }
+
+- (NSMutableDictionary<NSString *,NSMutableSet<UIView *> *> *)reusableViews{
+    if (!_reusableViews) {
+        _reusableViews = [NSMutableDictionary dictionary];
+    }
+    return _reusableViews;
+}
+
+- (UIView *)dequeueReusableViewWithIdentifier:(NSString *)identifier{
+    //    NSLog(@"start dequence :%@", self.reusableViewControllers);
+    NSMutableSet <UIView *> *views = self.reusableViews[identifier];
+    if (!views) {
+        views = [NSMutableSet set];
+        self.reusableViews[identifier] = views;
+    }
+    
+    UIView *view = [views anyObject];
+    if (view) {
+        [views removeObject:view];
+    }
+    return view;
+}
+
 
 - (void)setBeforeView:(UIView *)beforeView{
     [_beforeView removeFromSuperview];
@@ -269,9 +297,12 @@ static const NSInteger kSelectedIdx = 1;
         [_beforeView removeFromSuperview];
         [_selectedView removeFromSuperview];
 
-        //AfterView不需要了，移除
-        if (self.viewDidRemoveFromSuperViewBlock) {
-            self.viewDidRemoveFromSuperViewBlock(self, _beforeView);
+        BOOL needCache = [self _cacheViewIfNeedForReuse:_beforeView];
+        if (!needCache) {
+            //AfterView不需要了，移除
+            if (self.viewDidRemoveFromSuperViewBlock) {
+                self.viewDidRemoveFromSuperViewBlock(self, _beforeView);
+            }
         }
         
         _beforeView = nil;
@@ -297,9 +328,12 @@ static const NSInteger kSelectedIdx = 1;
         [_selectedView removeFromSuperview];
         [_afterView removeFromSuperview];
         
-        //BeforeView不需要了，移除
-        if (self.viewDidRemoveFromSuperViewBlock) {
-            self.viewDidRemoveFromSuperViewBlock(self, _afterView);
+        BOOL needCache = [self _cacheViewIfNeedForReuse:_afterView];
+        if (!needCache) {
+            //BeforeView不需要了，移除
+            if (self.viewDidRemoveFromSuperViewBlock) {
+                self.viewDidRemoveFromSuperViewBlock(self, _afterView);
+            }
         }
         
         _afterView = nil;
@@ -320,6 +354,22 @@ static const NSInteger kSelectedIdx = 1;
     if ([self.theDelegate respondsToSelector:_cmd]) {
         [self.theDelegate scrollViewDidScroll:scrollView];
     }
+}
+
+- (BOOL)_cacheViewIfNeedForReuse:(UIView *)view{
+    NSString *identifier = view.jc_pageScrollViewReuseIdentifier;
+    if (!identifier.length) {
+        return NO;
+    }
+    NSMutableSet <UIView *>* views = self.reusableViews[identifier];
+    
+    if (!views) {
+        views = [NSMutableSet set];
+        self.reusableViews[identifier] = views;
+    }
+    
+    [views addObject:view];
+    return YES;
 }
 
 
@@ -414,7 +464,16 @@ static const NSInteger kSelectedIdx = 1;
     }
 }
 
+@end
 
+@implementation UIView (JCPageScrollView)
+- (void)setJc_pageScrollViewReuseIdentifier:(NSString *)jc_pageScrollViewReuseIdentifier{
+    objc_setAssociatedObject(self, @selector(jc_pageScrollViewReuseIdentifier), jc_pageScrollViewReuseIdentifier, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (NSString *)jc_pageScrollViewReuseIdentifier{
+    return objc_getAssociatedObject(self, _cmd);
+}
 
 @end
 

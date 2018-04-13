@@ -39,11 +39,20 @@
                                     <action selector="onClickPageIndex:" destination="BYZ-38-t0r" eventType="touchUpInside" id="54a-Xj-WSz"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qpk-XI-wc0">
+                                <rect key="frame" x="114.5" y="235" width="146" height="30"/>
+                                <state key="normal" title="controllerIndexCache"/>
+                                <connections>
+                                    <action selector="onClickPageIndexCache:" destination="BYZ-38-t0r" eventType="touchUpInside" id="e4E-Kn-Zd3"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
+                            <constraint firstItem="qpk-XI-wc0" firstAttribute="centerX" secondItem="HFk-JS-UYA" secondAttribute="centerX" id="F9p-jf-3Zz"/>
                             <constraint firstItem="Kcu-fj-UFo" firstAttribute="top" secondItem="ihw-tK-BI1" secondAttribute="bottom" constant="32" id="HRM-lR-czm"/>
                             <constraint firstItem="HFk-JS-UYA" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="PnW-Bm-YWi"/>
+                            <constraint firstItem="HFk-JS-UYA" firstAttribute="top" secondItem="qpk-XI-wc0" secondAttribute="bottom" constant="53.5" id="TyH-KY-KJu"/>
                             <constraint firstItem="ihw-tK-BI1" firstAttribute="top" secondItem="HFk-JS-UYA" secondAttribute="bottom" constant="52.5" id="U8U-DL-zC9"/>
                             <constraint firstItem="Kcu-fj-UFo" firstAttribute="centerX" secondItem="ihw-tK-BI1" secondAttribute="centerX" id="cFh-XL-mbb"/>
                             <constraint firstItem="ihw-tK-BI1" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="k01-TA-htL"/>

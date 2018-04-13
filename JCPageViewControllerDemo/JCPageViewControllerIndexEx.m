@@ -59,7 +59,7 @@
         [self setControllerAfterSelectedViewControllerBlock:^UIViewController * _Nullable(__kindof JCPageViewController * _Nonnull thePageViewController, __kindof UIViewController * _Nonnull selectedViewController) {
             NSInteger maxCount = 0;
             if (weakSelf.viewControllerCountBlock) {
-                maxCount = self.viewControllerCountBlock(weakSelf);
+                maxCount = weakSelf.viewControllerCountBlock(weakSelf);
             }
             
             if (maxCount <= 0) {

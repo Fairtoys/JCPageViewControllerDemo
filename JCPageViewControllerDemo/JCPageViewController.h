@@ -30,6 +30,9 @@ typedef  void (^JCPageViewControllerTransitionBlock)(__kindof JCPageViewControll
 
 - (void)setCanLoadBeforeAndAfterViewController;//可再次加载前一个和后一个,并清掉beforeViewController 和afterViewController
 
+#pragma mark - 重用机制
+- (nullable __kindof UIViewController *)dequeueReusableViewControllerWithIdentifier:(NSString *)identifier;//从缓存中取出一个ViewController
+
 @end
 
 @protocol JCPageViewControllerItemVC <NSObject>

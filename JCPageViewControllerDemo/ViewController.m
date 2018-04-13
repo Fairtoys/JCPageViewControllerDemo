@@ -12,6 +12,7 @@
 #import "JCPageViewControllerDemo.h"
 #import "ItemViewController.h"
 #import "JCPageViewControllerIndexEx.h"
+#import "JCPageScrollView.h"
 
 @interface ViewController ()
 
@@ -87,6 +88,33 @@
     
     [self presentViewController:pageViewController animated:YES completion:NULL];
     
+}
+
+- (IBAction)onClickPageIndexCache:(id)sender {
+    
+    JCPageViewControllerIndexEx *pageViewController = [[JCPageViewControllerIndexEx alloc] init];
+    
+    [pageViewController setViewControllerAtIndexBlock:^__kindof UIViewController * _Nonnull(__kindof JCPageViewController * _Nonnull thePageViewController, NSInteger idx) {
+        static NSString *identifier = @"identifier";
+        ItemViewController *vc = [thePageViewController dequeueReusableViewControllerWithIdentifier:identifier];
+        if (!vc) {
+            vc = [[ItemViewController alloc] init];
+            vc.view.jc_pageScrollViewReuseIdentifier = identifier;
+        }
+        vc.view.tag = idx;
+        vc.imageView.image = [UIImage imageNamed:idx % 2 ? @"live_pk_bg_1": @"WechatIMG20"];
+        vc.label.text = [NSString stringWithFormat:@"%@", @(vc.view.tag)];
+        return vc;
+    }];
+    
+    [pageViewController setViewControllerCountBlock:^NSInteger(__kindof JCPageViewController * _Nonnull thePageViewController) {
+        return 20;
+    }];
+    
+    pageViewController.selectedIndex = 0;
+    
+    [self presentViewController:pageViewController animated:YES completion:NULL];
+
 }
 
 

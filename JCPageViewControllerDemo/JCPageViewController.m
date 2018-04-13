@@ -74,7 +74,10 @@
     [self.selectedViewController endAppearanceTransition];
 }
 
-
+- (UIViewController *)dequeueReusableViewControllerWithIdentifier:(NSString *)identifier{
+    UIView *view = [self.scrollView dequeueReusableViewWithIdentifier:identifier];
+    return [self controllerForView:view];
+}
 
 - (void)setSelectedViewController:(__kindof UIViewController *)selectedViewController{
 

@@ -50,6 +50,9 @@
     vc.label.text = [NSString stringWithFormat:@"%@", @(vc.view.tag)];
     [self.jc_thePageViewController setSelectedViewController:vc];
 }
+- (IBAction)onClickCloseBtn:(id)sender {
+    [self dismissViewControllerAnimated:YES completion:NULL];
+}
 
 //- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator{
 //    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
