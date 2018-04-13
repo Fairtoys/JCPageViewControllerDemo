@@ -17,6 +17,7 @@
 		02DF1E5A207DEBA200DCF4E7 /* JCPageScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 02DF1E59207DEBA200DCF4E7 /* JCPageScrollView.m */; };
 		02DF1E742080478800DCF4E7 /* ItemViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 02DF1E722080478800DCF4E7 /* ItemViewController.m */; };
 		02DF1E752080478800DCF4E7 /* ItemViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 02DF1E732080478800DCF4E7 /* ItemViewController.xib */; };
+		02DF1E782080AE6F00DCF4E7 /* JCPageViewControllerIndexEx.m in Sources */ = {isa = PBXBuildFile; fileRef = 02DF1E772080AE6E00DCF4E7 /* JCPageViewControllerIndexEx.m */; };
 		23B677F1207FBA0200A0B1FC /* JCPageViewControllerDemo.m in Sources */ = {isa = PBXBuildFile; fileRef = 23B677F0207FBA0200A0B1FC /* JCPageViewControllerDemo.m */; };
 		4DC39CEEDF809CA2806DACBF /* libPods-JCPageViewControllerDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F67893563E6AB28CB5CE3740 /* libPods-JCPageViewControllerDemo.a */; };
 /* End PBXBuildFile section */
@@ -39,6 +40,8 @@
 		02DF1E712080478800DCF4E7 /* ItemViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ItemViewController.h; sourceTree = "<group>"; };
 		02DF1E722080478800DCF4E7 /* ItemViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ItemViewController.m; sourceTree = "<group>"; };
 		02DF1E732080478800DCF4E7 /* ItemViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ItemViewController.xib; sourceTree = "<group>"; };
+		02DF1E762080AE6E00DCF4E7 /* JCPageViewControllerIndexEx.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JCPageViewControllerIndexEx.h; sourceTree = "<group>"; };
+		02DF1E772080AE6E00DCF4E7 /* JCPageViewControllerIndexEx.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JCPageViewControllerIndexEx.m; sourceTree = "<group>"; };
 		23B677EF207FBA0200A0B1FC /* JCPageViewControllerDemo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JCPageViewControllerDemo.h; sourceTree = "<group>"; };
 		23B677F0207FBA0200A0B1FC /* JCPageViewControllerDemo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JCPageViewControllerDemo.m; sourceTree = "<group>"; };
 		7B06AA2CED86D2E2841427FF /* Pods-JCPageViewControllerDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JCPageViewControllerDemo.debug.xcconfig"; path = "Pods/Target Support Files/Pods-JCPageViewControllerDemo/Pods-JCPageViewControllerDemo.debug.xcconfig"; sourceTree = "<group>"; };
@@ -90,6 +93,8 @@
 				02DF1E59207DEBA200DCF4E7 /* JCPageScrollView.m */,
 				02DF1E55207DD74700DCF4E7 /* JCPageViewController.h */,
 				02DF1E56207DD74700DCF4E7 /* JCPageViewController.m */,
+				02DF1E762080AE6E00DCF4E7 /* JCPageViewControllerIndexEx.h */,
+				02DF1E772080AE6E00DCF4E7 /* JCPageViewControllerIndexEx.m */,
 				23B677EF207FBA0200A0B1FC /* JCPageViewControllerDemo.h */,
 				23B677F0207FBA0200A0B1FC /* JCPageViewControllerDemo.m */,
 				02DF1E2D207CC83600DCF4E7 /* Main.storyboard */,
@@ -250,6 +255,7 @@
 				02DF1E742080478800DCF4E7 /* ItemViewController.m in Sources */,
 				23B677F1207FBA0200A0B1FC /* JCPageViewControllerDemo.m in Sources */,
 				02DF1E5A207DEBA200DCF4E7 /* JCPageScrollView.m in Sources */,
+				02DF1E782080AE6F00DCF4E7 /* JCPageViewControllerIndexEx.m in Sources */,
 				02DF1E29207CC83600DCF4E7 /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -34,6 +34,10 @@ typedef void(^JCPageScrollViewViewTransitionEndBlock)(__kindof JCPageScrollView 
 @property (nonatomic, copy, nullable) JCPageScrollViewAppearanceBlock viewDidRemoveFromSuperViewBlock;//当视图划走移除之后的回调
 
 - (void)setContentOffsetToSelectView;//设置Offset到SelectView的位置
+
+- (void)setCanLoadBeforeAndAfterView;//将needLoadBefore 和needLoadAfter字段都设为YES，方便下次加载新View,并清清掉beforeView和afterView
+#pragma mark - 重用机制
+
 @end
 
 

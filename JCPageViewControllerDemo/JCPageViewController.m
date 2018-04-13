@@ -23,6 +23,10 @@
 
 @implementation JCPageViewController
 
+- (void)setCanLoadBeforeAndAfterViewController{
+    [self.scrollView setCanLoadBeforeAndAfterView];
+}
+
 - (NSMutableDictionary<NSNumber *,UIViewController *> *)viewControllerMap{
     if (!_viewControllerMap) {
         _viewControllerMap = [NSMutableDictionary dictionary];
@@ -43,12 +47,6 @@
     [self.scrollView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.edges.equalTo(self.view);
     }];
-    UIGestureRecognizer *gesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(onPanGes:)];
-    [self.view addGestureRecognizer:gesture];
-    
-    UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
-    [self.view addSubview:btn];
-    [btn addTarget:self action:@selector(onClickBtn) forControlEvents:UIControlEventTouchUpInside];
 }
 
 - (void)viewWillAppear:(BOOL)animated{
@@ -76,9 +74,7 @@
     [self.selectedViewController endAppearanceTransition];
 }
 
-- (void)onPanGes:(UIPanGestureRecognizer *)sender{
-    NSLog(@"onPanGes");
-}
+
 
 - (void)setSelectedViewController:(__kindof UIViewController *)selectedViewController{
 
@@ -168,6 +164,10 @@
 //            [toController endAppearanceTransition];//这个不需要了，因为在滚动停止时才需要调用此方法，但是上一个缺需要在此时调用此方法来触发viewDidDisappear方法
             [fromController endAppearanceTransition];
             
+            //提供一个外部回调
+            if (weakSelf.controllerWillTransitionBlock) {
+                weakSelf.controllerWillTransitionBlock(weakSelf, fromController, toController);
+            }
             
         }];
         

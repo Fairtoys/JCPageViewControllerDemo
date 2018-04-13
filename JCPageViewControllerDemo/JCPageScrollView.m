@@ -79,6 +79,29 @@
     }
 }
 
+- (void)setCanLoadBeforeAndAfterView{
+    _needLoadAfterView = YES;
+    _needLoadBeforeView = YES;
+    
+    self.contentInset = UIEdgeInsetsZero;
+    if (_beforeView) {
+        if (self.viewDidRemoveFromSuperViewBlock) {
+            self.viewDidRemoveFromSuperViewBlock(self, _beforeView);
+        }
+        self.beforeView = nil;
+    }
+    
+    if (_afterView) {
+        if (self.viewDidRemoveFromSuperViewBlock) {
+            self.viewDidRemoveFromSuperViewBlock(self, _afterView);
+        }
+        self.afterView = nil;
+    }
+    
+    
+    
+}
+
 - (NSArray <UIView *> *)containerViews{
     if (!_containerViews) {
         _containerViews = @[[[UIView alloc] init],[[UIView alloc] init],[[UIView alloc] init]].mutableCopy;
@@ -130,7 +153,7 @@ static const NSInteger kSelectedIdx = 1;
     
     if (self.setuped) {
         self.contentOffset = CGPointMake(0, CGRectGetHeight(self.frame));
-        self.contentInset = UIEdgeInsetsMake(0, 0, 0, 0);
+        self.contentInset = UIEdgeInsetsZero;
     }
     
     if (resetData) {
@@ -177,7 +200,7 @@ static const NSInteger kSelectedIdx = 1;
                     
                     self.contentInset = UIEdgeInsetsMake(0, 0,  -CGRectGetHeight(scrollView.frame), 0);
                 }else{
-                    self.contentInset = UIEdgeInsetsMake(0, 0, 0, 0);
+                    self.contentInset = UIEdgeInsetsZero;
                     
                 }
                 
@@ -214,7 +237,7 @@ static const NSInteger kSelectedIdx = 1;
                     self.contentInset = UIEdgeInsetsMake(-CGRectGetHeight(scrollView.frame), 0, 0, 0);
                 }else{
                     
-                    self.contentInset = UIEdgeInsetsMake(0, 0, 0, 0);
+                    self.contentInset = UIEdgeInsetsZero;
                 }
 
             }else{
