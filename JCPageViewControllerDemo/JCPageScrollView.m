@@ -21,14 +21,20 @@
 
 @property (nonatomic, weak) id<UIScrollViewDelegate> theDelegate;
 
-@property (nonatomic, assign, getter=isNeedLoadAfterView) BOOL needLoadAfterView;
+@property (nonatomic, assign, getter = isNeedLoadAfterView) BOOL needLoadAfterView;
 
-@property (nonatomic, assign, getter=isNeedLoadBeforeView) BOOL needLoadBeforeView;
+@property (nonatomic, assign, getter = isNeedLoadBeforeView) BOOL needLoadBeforeView;
 
 @property (nonatomic, strong) UIView *beforeView;
 @property (nonatomic, strong) UIView *afterView;
 
 @property (nonatomic, assign) BOOL setuped;
+
+@property (nonatomic, assign, getter = isEnableViewWillTransitionBlock) BOOL enableViewWillTransitionBlock;
+
+@property (nonatomic, weak, nullable) UIView *transitioningView;
+
+@property (nonatomic, assign, getter = isTransitionComplete) BOOL transitionComplete;
 
 @end
 
@@ -59,6 +65,7 @@
 - (void)setupContainerViews{
     self.needLoadAfterView = YES;
     self.needLoadBeforeView = YES;
+    self.enableViewWillTransitionBlock = YES;
     [super setDelegate:self];
     [self.containerViews enumerateObjectsUsingBlock:^(UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [self addSubview:obj];
@@ -159,6 +166,7 @@
                     self.contentInset = UIEdgeInsetsMake(0, 0,  -CGRectGetHeight(scrollView.frame), 0);
                 }else{
                     self.contentInset = UIEdgeInsetsMake(0, 0, 0, 0);
+                    
                 }
                 
             }else{
@@ -167,6 +175,18 @@
             }
             
             //FIXME: 如果没有afterView，不让他滑动太远
+        }
+        
+        if (self.afterView) {
+            if (self.isEnableViewWillTransitionBlock) {//调用一次就不调了
+                self.enableViewWillTransitionBlock = NO;
+                self.transitioningView = self.afterView;
+                if (self.viewWillTransitionBlock) {
+                    self.viewWillTransitionBlock(self, self.selectedView, self.afterView);
+                }
+                self.transitionComplete = NO;
+            }
+
         }
     }else if (scrollView.contentOffset.y < CGRectGetHeight(scrollView.frame)){//加载上一个视图
         
@@ -192,6 +212,18 @@
                 self.contentInset = UIEdgeInsetsMake(-CGRectGetHeight(scrollView.frame), 0, 0, 0);
             }
         }
+        
+        if (self.beforeView) {
+            if (self.isEnableViewWillTransitionBlock) {//调用一次就不调了
+                self.enableViewWillTransitionBlock = NO;
+                self.transitioningView = self.beforeView;
+                if (self.viewWillTransitionBlock) {
+                    self.viewWillTransitionBlock(self, self.selectedView, self.beforeView);
+                }
+                self.transitionComplete = NO;
+            }
+        }
+        
     }
     
     if (scrollView.contentOffset.y >= CGRectGetHeight(scrollView.frame) * 2) {//上滑出了下一个
@@ -199,25 +231,20 @@
 //        NSLog(@"滑出下一个");
         self.needLoadAfterView = YES;
         self.needLoadBeforeView = NO;//因为上一个还在视图中，所以不需要加载新的视图
+        self.enableViewWillTransitionBlock = YES;
+        self.transitionComplete = YES;
         [_afterView removeFromSuperview];
         [_beforeView removeFromSuperview];
         [_selectedView removeFromSuperview];
 
-        if (self.selectedViewDidDisapearBlock) {
-            self.selectedViewDidDisapearBlock(self, _selectedView);
-        }
         _beforeView = nil;
         self.beforeView = self.selectedView;
         
-        if (self.selectedViewDidDisapearBlock) {
-            self.selectedViewDidDisapearBlock(self, self.beforeView);
-        }
-        
         _selectedView = nil;
         self.selectedView = self.afterView;
-        
-        if (self.selectedViewDidApearBlock) {
-            self.selectedViewDidApearBlock(self, self.selectedView);
+
+        if (self.viewDidTransitionBlock) {
+            self.viewDidTransitionBlock(self, self.beforeView, self.selectedView);
         }
         
         _afterView = nil;
@@ -227,6 +254,8 @@
 //        NSLog(@"下拉上一个");
         self.needLoadBeforeView = YES;
         self.needLoadAfterView = NO;//因为上一个还在视图中，所以不需要加载新的视图
+        self.enableViewWillTransitionBlock = YES;
+        self.transitionComplete = YES;
         [_beforeView removeFromSuperview];
         [_selectedView removeFromSuperview];
         [_afterView removeFromSuperview];
@@ -234,15 +263,12 @@
         _afterView = nil;
         self.afterView = self.selectedView;
         
-        if (self.selectedViewDidDisapearBlock) {
-            self.selectedViewDidDisapearBlock(self, self.afterView);
-        }
 
         _selectedView = nil;
         self.selectedView = self.beforeView;
         
-        if (self.selectedViewDidApearBlock) {
-            self.selectedViewDidApearBlock(self, self.selectedView);
+        if (self.viewDidTransitionBlock) {
+            self.viewDidTransitionBlock(self, self.afterView, self.selectedView);
         }
         
         _beforeView = nil;
@@ -252,6 +278,30 @@
         [self.theDelegate scrollViewDidScroll:scrollView];
     }
 }
+
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView{
+    
+    if (self.scrollDidEndBlock) {
+        self.scrollDidEndBlock(self, self.transitioningView, self.selectedView, self.isTransitionComplete);
+    }
+    self.transitionComplete = NO;
+    self.enableViewWillTransitionBlock = YES;
+    self.transitioningView = nil;
+    
+    if ([self.theDelegate respondsToSelector:_cmd]) {
+        [self.theDelegate scrollViewDidEndDecelerating:scrollView];
+    }
+}
+
+// called on finger up if the user dragged. decelerate is true if it will continue moving afterwards
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate{
+    if ([self.theDelegate respondsToSelector:_cmd]) {
+        [self.theDelegate scrollViewDidEndDragging:scrollView willDecelerate:decelerate];
+    }
+}
+
+
 - (void)scrollViewDidZoom:(UIScrollView *)scrollView{
     
     if ([self.theDelegate respondsToSelector:_cmd]) {
@@ -272,23 +322,14 @@
         [self.theDelegate scrollViewWillEndDragging:scrollView withVelocity:velocity targetContentOffset:targetContentOffset];
     }
 }
-// called on finger up if the user dragged. decelerate is true if it will continue moving afterwards
-- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate{
-    if ([self.theDelegate respondsToSelector:_cmd]) {
-        [self.theDelegate scrollViewDidEndDragging:scrollView willDecelerate:decelerate];
-    }
-}
+
 
 - (void)scrollViewWillBeginDecelerating:(UIScrollView *)scrollView{
     if ([self.theDelegate respondsToSelector:_cmd]) {
         [self.theDelegate scrollViewWillBeginDecelerating:scrollView];
     }
 }
-- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView{
-    if ([self.theDelegate respondsToSelector:_cmd]) {
-        [self.theDelegate scrollViewDidEndDecelerating:scrollView];
-    }
-}
+
 
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView{
     if ([self.theDelegate respondsToSelector:_cmd]) {
@@ -334,3 +375,5 @@
 
 
 @end
+
+

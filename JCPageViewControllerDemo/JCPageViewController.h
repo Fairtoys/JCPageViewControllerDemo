@@ -12,7 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class JCPageViewController;
 
-typedef  UIViewController * _Nullable  (^JCPageViewControllerControllerGetBlock)(JCPageViewController *thePageViewController, UIViewController *selectedViewController);
+typedef  UIViewController * _Nullable  (^JCPageViewControllerControllerGetBlock)(__kindof JCPageViewController *thePageViewController, __kindof UIViewController *selectedViewController);
 
 @interface JCPageViewController : UIViewController
 

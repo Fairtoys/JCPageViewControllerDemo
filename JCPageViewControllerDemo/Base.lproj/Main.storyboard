@@ -19,16 +19,25 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HFk-JS-UYA">
-                                <rect key="frame" x="164.5" y="318.5" width="46" height="30"/>
-                                <state key="normal" title="Button"/>
+                                <rect key="frame" x="170.5" y="318.5" width="34" height="30"/>
+                                <state key="normal" title="View"/>
                                 <connections>
                                     <action selector="onClickBtn:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Jsu-Do-ViU"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ihw-tK-BI1">
+                                <rect key="frame" x="153" y="401" width="68" height="30"/>
+                                <state key="normal" title="Controller"/>
+                                <connections>
+                                    <action selector="onClickControllerBtn:" destination="BYZ-38-t0r" eventType="touchUpInside" id="KKc-mg-pMB"/>
                                 </connections>
                             </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="HFk-JS-UYA" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="PnW-Bm-YWi"/>
+                            <constraint firstItem="ihw-tK-BI1" firstAttribute="top" secondItem="HFk-JS-UYA" secondAttribute="bottom" constant="52.5" id="U8U-DL-zC9"/>
+                            <constraint firstItem="ihw-tK-BI1" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="k01-TA-htL"/>
                             <constraint firstItem="HFk-JS-UYA" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="yzT-3F-srR"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>

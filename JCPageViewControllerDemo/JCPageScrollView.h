@@ -12,9 +12,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class JCPageScrollView;
 
-typedef  UIView * _Nullable  (^JCPageScrollViewGetViewBlock)(JCPageScrollView *thePageScrollView, __kindof UIView *selectedView);
+typedef  UIView * _Nullable  (^JCPageScrollViewGetViewBlock)(__kindof JCPageScrollView *thePageScrollView, __kindof UIView *selectedView);
 
-typedef void(^JCPageScrollViewAppearanceBlock)(JCPageScrollView *thePageScrollView, __kindof UIView *selectedView);
+typedef void(^JCPageScrollViewAppearanceBlock)(__kindof JCPageScrollView *thePageScrollView, __kindof UIView *selectedView);
+
+typedef void(^JCPageScrollViewViewTransitionBlock)(__kindof JCPageScrollView *thePageScrollView,__kindof UIView *fromView,__kindof UIView *toView);
+typedef void(^JCPageScrollViewViewTransitionEndBlock)(__kindof JCPageScrollView *thePageScrollView, __kindof UIView * _Nullable fromView,__kindof UIView *toView, BOOL isTransitionComplete);
 
 @interface JCPageScrollView : UIScrollView
 
@@ -28,7 +31,16 @@ typedef void(^JCPageScrollViewAppearanceBlock)(JCPageScrollView *thePageScrollVi
 @property (nonatomic, copy, nullable) JCPageScrollViewAppearanceBlock selectedViewDidDisapearBlock;
 @property (nonatomic, copy, nullable) JCPageScrollViewAppearanceBlock selectedViewDidApearBlock;
 
+
+@property (nonatomic, copy, nullable) JCPageScrollViewViewTransitionBlock viewWillTransitionBlock;
+@property (nonatomic, copy, nullable) JCPageScrollViewViewTransitionBlock viewDidTransitionBlock;
+
+@property (nonatomic, copy, nullable) JCPageScrollViewViewTransitionEndBlock scrollDidEndBlock;
+
 - (void)setContentOffsetToSelectView;
 @end
+
+
+
 
 NS_ASSUME_NONNULL_END
