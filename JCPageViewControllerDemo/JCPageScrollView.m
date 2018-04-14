@@ -10,6 +10,86 @@
 #import <Masonry.h>
 #import <objc/runtime.h>
 
+@interface JCPageScrollViewOrientation : NSObject
+
+- (instancetype)initWithScrollView:(JCPageScrollView *)scrollView;
+
+@property (nonatomic, weak) JCPageScrollView *scrollView;
+- (JCPageScrollViewNavigationOrientation)orientationType;
+- (void)setAlwaysBounce;
+- (void)setContainerViewsFrame:(UIView *)obj idx:(NSUInteger)idx;
+- (CGSize)contentSize;
+- (CGPoint)contentOffsetForSelectedView;
+- (BOOL)isShouldLoadBeforeView;
+- (UIEdgeInsets)contentInsetForNoBeforeView;
+- (BOOL)isShouldLoadAfterView;
+- (UIEdgeInsets)contentInsetForNoAfterView;
+- (BOOL)isShouldSetBeforeViewToSelectedView;
+- (BOOL)isShouldSetAfterViewToSelectedView;
+- (void)willChangeToSize:(CGSize)size;
+@end
+
+
+@implementation JCPageScrollViewOrientation
+
+- (instancetype)initWithScrollView:(JCPageScrollView *)scrollView{
+    if (self = [super init]) {
+        self.scrollView = scrollView;
+    }
+    return self;
+}
+
+- (JCPageScrollViewNavigationOrientation)orientationType{
+    return JCPageScrollViewNavigationOrientationHorizontal;
+}
+- (void)setAlwaysBounce{
+    
+}
+- (void)setContainerViewsFrame:(UIView *)obj idx:(NSUInteger)idx{
+    
+}
+- (CGPoint)contentOffsetForSelectedView{
+    return CGPointZero;
+}
+- (BOOL)isShouldLoadBeforeView{
+    return NO;
+}
+- (UIEdgeInsets)contentInsetForNoBeforeView{
+    return UIEdgeInsetsZero;
+}
+- (BOOL)isShouldLoadAfterView{
+    return NO;
+}
+- (UIEdgeInsets)contentInsetForNoAfterView{
+    return UIEdgeInsetsZero;
+}
+- (BOOL)isShouldSetBeforeViewToSelectedView{
+    return NO;
+}
+- (BOOL)isShouldSetAfterViewToSelectedView{
+    return NO;
+}
+- (CGSize)contentSize{
+    return CGSizeZero;
+}
+- (void)willChangeToSize:(CGSize)size{
+    
+}
+
+@end
+
+@interface JCPageScrollViewOrientationVertical : JCPageScrollViewOrientation
+
+@end
+
+
+
+@interface JCPageScrollViewOrientationHorizontal : JCPageScrollViewOrientation
+
+@end
+
+
+
 @interface JCPageScrollView () <UIScrollViewDelegate>
 
 @property (nonatomic, strong) NSArray <UIView *> *containerViews;//有三个视图容器，初始化ScrollView时就创建好
@@ -35,6 +115,9 @@
 
 @property (nonatomic, assign, getter = isTransitionComplete) BOOL transitionComplete;//当前切换是否完成了，给Controller使用的，controller需要重新调用划走的VC的appearmethods
 
+#pragma mark 方向类
+@property (nonatomic, strong) JCPageScrollViewOrientation *orientation;
+
 #pragma mark 重用
 
 @property (nonatomic, strong) NSMutableDictionary <NSString *, NSMutableSet <UIView *> *> * reusableViews;
@@ -42,6 +125,17 @@
 @end
 
 @implementation JCPageScrollView
+
+- (instancetype)init{
+    return [self initWithOrientationType:JCPageScrollViewNavigationOrientationHorizontal];
+}
+
+- (instancetype)initWithOrientationType:(JCPageScrollViewNavigationOrientation)orientationType{
+    if (self = [super init]) {
+        self.navigationOrientationType = orientationType;
+    }
+    return self;
+}
 
 - (instancetype)initWithFrame:(CGRect)frame
 {
@@ -66,6 +160,7 @@
 }
 
 - (void)setupContainerViews{
+    self.pagingEnabled = YES;
     [self _resetData];
     [super setDelegate:self];
     [self.containerViews enumerateObjectsUsingBlock:^(UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -75,12 +170,12 @@
 
 - (void)layoutSubviews{
     [self.containerViews enumerateObjectsUsingBlock:^(UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        obj.frame = CGRectMake(0, CGRectGetHeight(self.frame) * idx, CGRectGetWidth(self.frame), CGRectGetHeight(self.frame));
+        [self setContainerViewsFrame:obj idx:idx];
     }];
-    self.contentSize = CGSizeMake(CGRectGetWidth(self.frame), CGRectGetMaxY(self.containerViews.lastObject.frame));
+    self.contentSize = [self theContentSize];
     if (!self.setuped) {
         self.setuped = YES;
-        self.contentOffset = CGPointMake(0, CGRectGetHeight(self.frame));
+        self.contentOffset = [self contentOffsetForSelectedView];
     }
 }
 
@@ -103,9 +198,33 @@
         self.afterView = nil;
     }
     
-    
-    
 }
+
+- (void)setNavigationOrientationType:(JCPageScrollViewNavigationOrientation)navigationOrientationType{
+    switch (navigationOrientationType) {
+        case JCPageScrollViewNavigationOrientationVertical:
+            self.orientation = [[JCPageScrollViewOrientationVertical alloc] initWithScrollView:self];
+            break;
+        default:
+            self.orientation = [[JCPageScrollViewOrientationHorizontal alloc] initWithScrollView:self];
+            break;
+    }
+}
+
+- (JCPageScrollViewNavigationOrientation)navigationOrientationType{
+    return self.orientation.orientationType;
+}
+
+- (void)setOrientation:(JCPageScrollViewOrientation *)orientation{
+    if (_orientation == orientation) {
+        return ;
+    }
+    _orientation = orientation;
+//    self.setuped = NO;//在layout的时候重新设置contentOffset
+    [_orientation setAlwaysBounce];
+    [self setNeedsLayout];
+}
+
 
 - (NSArray <UIView *> *)containerViews{
     if (!_containerViews) {
@@ -143,7 +262,6 @@ static const NSInteger kSelectedIdx = 1;
 }
 
 - (UIView *)dequeueReusableViewWithIdentifier:(NSString *)identifier{
-    //    NSLog(@"start dequence :%@", self.reusableViewControllers);
     NSMutableSet <UIView *> *views = self.reusableViews[identifier];
     if (!views) {
         views = [NSMutableSet set];
@@ -180,7 +298,8 @@ static const NSInteger kSelectedIdx = 1;
     }];
     
     if (self.setuped) {
-        self.contentOffset = CGPointMake(0, CGRectGetHeight(self.frame));
+//        self.contentOffset = CGPointMake(0, CGRectGetHeight(self.frame));
+        self.contentOffset = [self contentOffsetForSelectedView];
         self.contentInset = UIEdgeInsetsZero;
     }
     
@@ -208,16 +327,15 @@ static const NSInteger kSelectedIdx = 1;
 }
 
 - (void)setContentOffsetToSelectView{
-    self.contentOffset = CGPointMake(0, CGRectGetHeight(self.frame));
+//    self.contentOffset = CGPointMake(0, CGRectGetHeight(self.frame));
+    self.contentOffset = [self contentOffsetForSelectedView];
 }
 
 #pragma mark - ScrollViewDelegate
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView{
-//    NSLog(@"scrollView did scroll:%@, frame :%@", NSStringFromCGPoint(scrollView.contentOffset), NSStringFromCGRect(scrollView.frame));
-    //    scrollView.contentOffset = CGPointMake(0, CGRectGetHeight(scrollView.frame));
+    if ([self isShouldLoadAfterView]){
+//    if (scrollView.contentOffset.y > CGRectGetHeight(scrollView.frame)) {//加载下一个视图
     
-    if (scrollView.contentOffset.y > CGRectGetHeight(scrollView.frame)) {//加载下一个视图
-        
         if (self.isNeedLoadAfterView) {
             self.needLoadAfterView = NO;
             if (self.viewAfterSelectedViewBlock) {
@@ -225,16 +343,16 @@ static const NSInteger kSelectedIdx = 1;
 //                NSLog(@"加载下一个%@", self.afterView);
                 //FIXME: 如果没有afterView，不让他滑动太远
                 if (!_afterView) {
-                    
-                    self.contentInset = UIEdgeInsetsMake(0, 0,  -CGRectGetHeight(scrollView.frame), 0);
+//                    self.contentInset = UIEdgeInsetsMake(0, 0,  -CGRectGetHeight(scrollView.frame), 0);
+                    self.contentInset = [self contentInsetForNoAfterView];
                 }else{
                     self.contentInset = UIEdgeInsetsZero;
                     
                 }
                 
             }else{
-                
-                self.contentInset = UIEdgeInsetsMake(0, 0,  -CGRectGetHeight(scrollView.frame), 0);
+//                self.contentInset = UIEdgeInsetsMake(0, 0,  -CGRectGetHeight(scrollView.frame), 0);
+                self.contentInset = [self contentInsetForNoAfterView];
             }
             
             //FIXME: 如果没有afterView，不让他滑动太远
@@ -250,8 +368,8 @@ static const NSInteger kSelectedIdx = 1;
             }
 
         }
-    }else if (scrollView.contentOffset.y < CGRectGetHeight(scrollView.frame)){//加载上一个视图
-        
+//    }else if (scrollView.contentOffset.y < CGRectGetHeight(scrollView.frame)){//加载上一个视图
+    }else if ([self isShouldLoadBeforeView]){//加载上一个视图
         
         
         if (self.isNeedLoadBeforeView) {
@@ -262,7 +380,8 @@ static const NSInteger kSelectedIdx = 1;
                 //FIXME: 如果没有beforeView, 不让他滑太远
                 if (!_beforeView) {
                     
-                    self.contentInset = UIEdgeInsetsMake(-CGRectGetHeight(scrollView.frame), 0, 0, 0);
+//                    self.contentInset = UIEdgeInsetsMake(-CGRectGetHeight(scrollView.frame), 0, 0, 0);
+                    self.contentInset = [self contentInsetForNoBeforeView];
                 }else{
                     
                     self.contentInset = UIEdgeInsetsZero;
@@ -271,7 +390,8 @@ static const NSInteger kSelectedIdx = 1;
             }else{
                 //FIXME: 如果没有afterView，不让他滑动太远
                 
-                self.contentInset = UIEdgeInsetsMake(-CGRectGetHeight(scrollView.frame), 0, 0, 0);
+//                self.contentInset = UIEdgeInsetsMake(-CGRectGetHeight(scrollView.frame), 0, 0, 0);
+                self.contentInset = [self contentInsetForNoBeforeView];
             }
         }
         
@@ -286,9 +406,9 @@ static const NSInteger kSelectedIdx = 1;
         }
         
     }
+    if ([self isShouldSetAfterViewToSelectedView]){
+//    if (scrollView.contentOffset.y >= CGRectGetHeight(scrollView.frame) * 2) {//上滑出了下一个
     
-    if (scrollView.contentOffset.y >= CGRectGetHeight(scrollView.frame) * 2) {//上滑出了下一个
-        
 //        NSLog(@"滑出下一个");
         self.needLoadAfterView = YES;
         self.needLoadBeforeView = NO;//因为上一个还在视图中，所以不需要加载新的视图
@@ -319,7 +439,8 @@ static const NSInteger kSelectedIdx = 1;
         _afterView = nil;
     }
     
-    if (scrollView.contentOffset.y <= 0) {//下拉出上一个
+//    if (scrollView.contentOffset.y <= 0) {//下拉出上一个
+    if ([self isShouldSetBeforeViewToSelectedView]) {//下拉出上一个
 //        NSLog(@"下拉上一个");
         self.needLoadBeforeView = YES;
         self.needLoadAfterView = NO;//因为上一个还在视图中，所以不需要加载新的视图
@@ -371,7 +492,39 @@ static const NSInteger kSelectedIdx = 1;
     [views addObject:view];
     return YES;
 }
+#pragma mark - orientation methods start
+- (void)setContainerViewsFrame:(UIView *)obj idx:(NSUInteger)idx{
+    [self.orientation setContainerViewsFrame:obj idx:idx];
+}
+- (CGPoint)contentOffsetForSelectedView{
+    return [self.orientation contentOffsetForSelectedView];
+}
+- (BOOL)isShouldLoadBeforeView{
+    return [self.orientation isShouldLoadBeforeView];
+}
+- (UIEdgeInsets)contentInsetForNoBeforeView{
+    return [self.orientation contentInsetForNoBeforeView];
+}
+- (BOOL)isShouldLoadAfterView{
+    return [self.orientation isShouldLoadAfterView];
+}
+- (UIEdgeInsets)contentInsetForNoAfterView{
+    return [self.orientation contentInsetForNoAfterView];
+}
+- (BOOL)isShouldSetBeforeViewToSelectedView{
+    return [self.orientation isShouldSetBeforeViewToSelectedView];
+}
+- (BOOL)isShouldSetAfterViewToSelectedView{
+    return [self.orientation isShouldSetAfterViewToSelectedView];
+}
+- (CGSize)theContentSize{
+    return [self.orientation contentSize];
+}
+- (void)willChangeToSize:(CGSize)size{
+    [self.orientation willChangeToSize:size];
+}
 
+#pragma mark - orientation methods end
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView{
     
@@ -465,6 +618,109 @@ static const NSInteger kSelectedIdx = 1;
 }
 
 @end
+
+@implementation JCPageScrollViewOrientationVertical
+
+- (JCPageScrollViewNavigationOrientation)orientationType{
+    return JCPageScrollViewNavigationOrientationVertical;
+}
+
+- (void)setAlwaysBounce{
+    self.scrollView.alwaysBounceVertical = YES;
+    self.scrollView.alwaysBounceHorizontal = NO;
+}
+
+- (void)setContainerViewsFrame:(UIView *)obj idx:(NSUInteger)idx{
+    obj.frame = CGRectMake(0, CGRectGetHeight(self.scrollView.frame) * idx, CGRectGetWidth(self.scrollView.frame), CGRectGetHeight(self.scrollView.frame));
+}
+
+- (CGPoint)contentOffsetForSelectedView{
+    return CGPointMake(0, CGRectGetHeight(self.scrollView.frame));
+}
+
+- (BOOL)isShouldLoadBeforeView{
+    return self.scrollView.contentOffset.y < CGRectGetHeight(self.scrollView.frame);
+}
+
+- (UIEdgeInsets)contentInsetForNoBeforeView{
+    return UIEdgeInsetsMake(-CGRectGetHeight(self.scrollView.frame), 0, 0, 0);
+}
+
+- (BOOL)isShouldLoadAfterView{
+    return self.scrollView.contentOffset.y > CGRectGetHeight(self.scrollView.frame);
+}
+
+- (UIEdgeInsets)contentInsetForNoAfterView{
+    return UIEdgeInsetsMake(0, 0,  -CGRectGetHeight(self.scrollView.frame), 0);
+}
+
+- (BOOL)isShouldSetBeforeViewToSelectedView{
+    return self.scrollView.contentOffset.y <= 0;
+}
+- (BOOL)isShouldSetAfterViewToSelectedView{
+    return self.scrollView.contentOffset.y >= CGRectGetHeight(self.scrollView.frame) * 2;
+}
+- (CGSize)contentSize{
+    return CGSizeMake(CGRectGetWidth(self.scrollView.frame), CGRectGetMaxY(self.scrollView.containerViews.lastObject.frame));
+}
+- (void)willChangeToSize:(CGSize)size{
+    self.scrollView.contentOffset = CGPointMake(0, size.height);
+}
+
+@end
+
+@implementation JCPageScrollViewOrientationHorizontal
+
+- (JCPageScrollViewNavigationOrientation)orientationType{
+    return JCPageScrollViewNavigationOrientationHorizontal;
+}
+
+- (void)setAlwaysBounce{
+    self.scrollView.alwaysBounceVertical = NO;
+    self.scrollView.alwaysBounceHorizontal = YES;
+}
+
+- (void)setContainerViewsFrame:(UIView *)obj idx:(NSUInteger)idx{
+    obj.frame = CGRectMake(CGRectGetWidth(self.scrollView.frame) * idx, 0, CGRectGetWidth(self.scrollView.frame), CGRectGetHeight(self.scrollView.frame));
+}
+
+- (CGPoint)contentOffsetForSelectedView{
+    return CGPointMake(CGRectGetWidth(self.scrollView.frame), 0);
+}
+
+- (BOOL)isShouldLoadBeforeView{
+    return self.scrollView.contentOffset.x < CGRectGetWidth(self.scrollView.frame);
+}
+
+- (UIEdgeInsets)contentInsetForNoBeforeView{
+    return UIEdgeInsetsMake(0, -CGRectGetWidth(self.scrollView.frame), 0, 0);
+}
+
+- (BOOL)isShouldLoadAfterView{
+    return self.scrollView.contentOffset.x > CGRectGetWidth(self.scrollView.frame);
+}
+
+- (UIEdgeInsets)contentInsetForNoAfterView{
+    return UIEdgeInsetsMake(0, 0, 0, -CGRectGetWidth(self.scrollView.frame));
+}
+
+- (BOOL)isShouldSetBeforeViewToSelectedView{
+    return self.scrollView.contentOffset.x <= 0;
+}
+- (BOOL)isShouldSetAfterViewToSelectedView{
+    return self.scrollView.contentOffset.x >= CGRectGetWidth(self.scrollView.frame) * 2;
+}
+- (CGSize)contentSize{
+    return CGSizeMake(CGRectGetMaxX(self.scrollView.containerViews.lastObject.frame), CGRectGetHeight(self.scrollView.frame));
+}
+
+- (void)willChangeToSize:(CGSize)size{
+    self.scrollView.contentOffset = CGPointMake(size.width, 0);
+}
+
+@end
+
+
 
 @implementation UIView (JCPageScrollView)
 - (void)setJc_pageScrollViewReuseIdentifier:(NSString *)jc_pageScrollViewReuseIdentifier{

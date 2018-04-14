@@ -118,8 +118,7 @@
 - (JCPageScrollView *)scrollView{
     if (!_scrollView) {
         _scrollView = [[JCPageScrollView alloc] init];
-        _scrollView.pagingEnabled = YES;
-        _scrollView.alwaysBounceVertical = YES;
+        
         [_scrollView.panGestureRecognizer addTarget:self action:@selector(onScrollViewPan:)];
         __weak typeof(self) weakSelf = self;
         [_scrollView setViewAfterSelectedViewBlock:^UIView * _Nullable(JCPageScrollView * _Nonnull thePageScrollView, __kindof UIView * _Nonnull selectedView) {
@@ -207,6 +206,12 @@
     }
     return _scrollView;
 }
+- (void)setNavigationOrientationType:(JCPageViewControllerNavigationOrientation)navigationOrientationType{
+    self.scrollView.navigationOrientationType = (JCPageScrollViewNavigationOrientation)navigationOrientationType;
+}
+- (JCPageViewControllerNavigationOrientation)navigationOrientationType{
+    return (JCPageViewControllerNavigationOrientation)self.scrollView.navigationOrientationType;
+}
 
 - (UIViewController *)controllerForView:(UIView *)view{
     if (!view) {
@@ -237,7 +242,8 @@
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
     [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
         
-        self.scrollView.contentOffset = CGPointMake(0, size.height);
+//        self.scrollView.contentOffset = CGPointMake(0, size.height);
+        [self.scrollView willChangeToSize:size];
     } completion:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
         
     }];

@@ -16,9 +16,16 @@ NS_ASSUME_NONNULL_BEGIN
 typedef  UIViewController * _Nullable  (^JCPageViewControllerControllerGetBlock)(__kindof JCPageViewController *thePageViewController, __kindof UIViewController *selectedViewController);
 typedef  void (^JCPageViewControllerTransitionBlock)(__kindof JCPageViewController *thePageViewController, __kindof UIViewController *fromViewController, __kindof UIViewController *toViewController);
 
+typedef NS_ENUM(NSUInteger, JCPageViewControllerNavigationOrientation) {
+    JCPageViewControllerNavigationOrientationHorizontal = 0,
+    JCPageViewControllerNavigationOrientationVertical = 1
+};
+
 @interface JCPageViewController : UIViewController
 
 @property (nonatomic, readonly) JCPageScrollView *scrollView;
+
+@property (nonatomic, assign) JCPageViewControllerNavigationOrientation navigationOrientationType;
 
 @property (nonatomic, strong) __kindof UIViewController *selectedViewController;//当前选中的ViewController
 

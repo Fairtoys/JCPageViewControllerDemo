@@ -17,11 +17,21 @@ typedef void(^JCPageScrollViewAppearanceBlock)(__kindof JCPageScrollView *thePag
 typedef void(^JCPageScrollViewViewTransitionBlock)(__kindof JCPageScrollView *thePageScrollView,__kindof UIView *fromView,__kindof UIView *toView);
 typedef void(^JCPageScrollViewViewTransitionEndBlock)(__kindof JCPageScrollView *thePageScrollView, __kindof UIView * _Nullable fromView,__kindof UIView *toView, BOOL isTransitionComplete);
 
+
+typedef NS_ENUM(NSUInteger, JCPageScrollViewNavigationOrientation) {
+    JCPageScrollViewNavigationOrientationHorizontal = 0,
+    JCPageScrollViewNavigationOrientationVertical = 1
+};
+
 @interface JCPageScrollView : UIScrollView
+
+- (instancetype)initWithOrientationType:(JCPageScrollViewNavigationOrientation)orientationType;
 
 - (UIView *)containerViewAtIndex:(NSInteger)index;
 
 @property (nonatomic, strong) UIView *selectedView;//当前显示的视图
+
+@property (nonatomic, assign) JCPageScrollViewNavigationOrientation navigationOrientationType;//方向
 
 @property (nonatomic, copy, nullable) JCPageScrollViewGetViewBlock viewBeforeSelectedViewBlock;//获取当前视图之前的视图的回调
 @property (nonatomic, copy, nullable) JCPageScrollViewGetViewBlock viewAfterSelectedViewBlock;//获取当前视图之后的视图的回调
@@ -41,7 +51,7 @@ typedef void(^JCPageScrollViewViewTransitionEndBlock)(__kindof JCPageScrollView 
 
 - (nullable __kindof UIView *)dequeueReusableViewWithIdentifier:(NSString *)identifier;//从缓存中取出一个ViewController
 
-
+- (void)willChangeToSize:(CGSize)size;
 @end
 
 @interface UIView (JCPageScrollView)
