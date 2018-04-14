@@ -24,6 +24,7 @@
 - (UIEdgeInsets)contentInsetForNoBeforeView;
 - (BOOL)isShouldLoadAfterView;
 - (UIEdgeInsets)contentInsetForNoAfterView;
+- (UIEdgeInsets)contentInsetForNoBeforeAndAfterView;
 - (BOOL)isShouldSetBeforeViewToSelectedView;
 - (BOOL)isShouldSetAfterViewToSelectedView;
 - (void)willChangeToSize:(CGSize)size;
@@ -61,6 +62,9 @@
     return NO;
 }
 - (UIEdgeInsets)contentInsetForNoAfterView{
+    return UIEdgeInsetsZero;
+}
+- (UIEdgeInsets)contentInsetForNoBeforeAndAfterView{
     return UIEdgeInsetsZero;
 }
 - (BOOL)isShouldSetBeforeViewToSelectedView{
@@ -122,6 +126,8 @@
 
 @property (nonatomic, strong) NSMutableDictionary <NSString *, NSMutableSet <UIView *> *> * reusableViews;
 
+@property (nonatomic, assign, getter = isLayoutContainerViewsOnly) BOOL layoutContainerViewsOnly;
+
 @end
 
 @implementation JCPageScrollView
@@ -172,7 +178,13 @@
     [self.containerViews enumerateObjectsUsingBlock:^(UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [self setContainerViewsFrame:obj idx:idx];
     }];
-    self.contentSize = [self theContentSize];
+    CGSize lastContentSize = self.contentSize;
+    CGSize contentSize = [self theContentSize];
+    if (!CGSizeEqualToSize(lastContentSize, contentSize)) {
+        self.layoutContainerViewsOnly = YES;
+    }
+    self.contentSize = contentSize;
+    
     if (!self.setuped) {
         self.setuped = YES;
         self.contentOffset = [self contentOffsetForSelectedView];
@@ -220,11 +232,12 @@
         return ;
     }
     _orientation = orientation;
-//    self.setuped = NO;//在layout的时候重新设置contentOffset
+    
+    self.setuped = NO;//在layout的时候重新设置contentOffset
     [_orientation setAlwaysBounce];
+    [self _setContentInsetByBeforeAndAfterView];
     [self setNeedsLayout];
 }
-
 
 - (NSArray <UIView *> *)containerViews{
     if (!_containerViews) {
@@ -317,6 +330,26 @@ static const NSInteger kSelectedIdx = 1;
     self.afterView = nil;
 }
 
+- (void)_setContentInsetByBeforeAndAfterView{
+    
+    if (!_beforeView && !_afterView) {
+        self.contentInset = [self contentInsetForNoBeforeAndAfterView];
+        return;
+    }
+    
+    if (!_beforeView) {
+        self.contentInset = [self contentInsetForNoBeforeView];
+        return;
+    }
+    
+    if (!_afterView) {
+        self.contentInset = [self contentInsetForNoAfterView];
+        return;
+    }
+    
+    self.contentInset = UIEdgeInsetsZero;
+}
+
 - (void)setAfterView:(UIView *)afterView{
     [_afterView removeFromSuperview];
     _afterView = afterView;
@@ -333,6 +366,12 @@ static const NSInteger kSelectedIdx = 1;
 
 #pragma mark - ScrollViewDelegate
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView{
+    
+    if (self.isLayoutContainerViewsOnly) {
+        self.layoutContainerViewsOnly = NO;
+        return;
+    }
+    
     if ([self isShouldLoadAfterView]){
 //    if (scrollView.contentOffset.y > CGRectGetHeight(scrollView.frame)) {//加载下一个视图
     
@@ -340,22 +379,9 @@ static const NSInteger kSelectedIdx = 1;
             self.needLoadAfterView = NO;
             if (self.viewAfterSelectedViewBlock) {
                 self.afterView = self.viewAfterSelectedViewBlock(self, self.selectedView);
-//                NSLog(@"加载下一个%@", self.afterView);
-                //FIXME: 如果没有afterView，不让他滑动太远
-                if (!_afterView) {
-//                    self.contentInset = UIEdgeInsetsMake(0, 0,  -CGRectGetHeight(scrollView.frame), 0);
-                    self.contentInset = [self contentInsetForNoAfterView];
-                }else{
-                    self.contentInset = UIEdgeInsetsZero;
-                    
-                }
                 
-            }else{
-//                self.contentInset = UIEdgeInsetsMake(0, 0,  -CGRectGetHeight(scrollView.frame), 0);
-                self.contentInset = [self contentInsetForNoAfterView];
             }
-            
-            //FIXME: 如果没有afterView，不让他滑动太远
+            [self _setContentInsetByBeforeAndAfterView];
         }
         
         if (self.afterView) {
@@ -376,23 +402,8 @@ static const NSInteger kSelectedIdx = 1;
             self.needLoadBeforeView = NO;
             if (self.viewBeforeSelectedViewBlock) {
                 self.beforeView = self.viewBeforeSelectedViewBlock(self, self.selectedView);
-//                NSLog(@"加载上一个:%@", self.beforeView);
-                //FIXME: 如果没有beforeView, 不让他滑太远
-                if (!_beforeView) {
-                    
-//                    self.contentInset = UIEdgeInsetsMake(-CGRectGetHeight(scrollView.frame), 0, 0, 0);
-                    self.contentInset = [self contentInsetForNoBeforeView];
-                }else{
-                    
-                    self.contentInset = UIEdgeInsetsZero;
-                }
-
-            }else{
-                //FIXME: 如果没有afterView，不让他滑动太远
-                
-//                self.contentInset = UIEdgeInsetsMake(-CGRectGetHeight(scrollView.frame), 0, 0, 0);
-                self.contentInset = [self contentInsetForNoBeforeView];
             }
+            [self _setContentInsetByBeforeAndAfterView];
         }
         
         if (self.beforeView) {
@@ -511,6 +522,11 @@ static const NSInteger kSelectedIdx = 1;
 - (UIEdgeInsets)contentInsetForNoAfterView{
     return [self.orientation contentInsetForNoAfterView];
 }
+
+- (UIEdgeInsets)contentInsetForNoBeforeAndAfterView{
+    return [self.orientation contentInsetForNoBeforeAndAfterView];
+}
+
 - (BOOL)isShouldSetBeforeViewToSelectedView{
     return [self.orientation isShouldSetBeforeViewToSelectedView];
 }
@@ -654,6 +670,10 @@ static const NSInteger kSelectedIdx = 1;
     return UIEdgeInsetsMake(0, 0,  -CGRectGetHeight(self.scrollView.frame), 0);
 }
 
+- (UIEdgeInsets)contentInsetForNoBeforeAndAfterView{
+    return UIEdgeInsetsMake(-CGRectGetHeight(self.scrollView.frame), 0,  -CGRectGetHeight(self.scrollView.frame), 0);
+}
+
 - (BOOL)isShouldSetBeforeViewToSelectedView{
     return self.scrollView.contentOffset.y <= 0;
 }
@@ -702,6 +722,9 @@ static const NSInteger kSelectedIdx = 1;
 
 - (UIEdgeInsets)contentInsetForNoAfterView{
     return UIEdgeInsetsMake(0, 0, 0, -CGRectGetWidth(self.scrollView.frame));
+}
+- (UIEdgeInsets)contentInsetForNoBeforeAndAfterView{
+    return UIEdgeInsetsMake(0, -CGRectGetWidth(self.scrollView.frame), 0, -CGRectGetWidth(self.scrollView.frame));
 }
 
 - (BOOL)isShouldSetBeforeViewToSelectedView{
