@@ -110,8 +110,11 @@
     [pageViewController setViewControllerCountBlock:^NSInteger(__kindof JCPageViewController * _Nonnull thePageViewController) {
         return 20;
     }];
+    [pageViewController setControllerDidTransitionBlock:^(__kindof JCPageViewController * _Nonnull thePageViewController, __kindof UIViewController * _Nonnull fromViewController, __kindof UIViewController * _Nonnull toViewController) {
+        NSLog(@"did transition fromViewController%@ tag:%@ toViewController:%@, tag:%@", fromViewController,@(toViewController.view.tag), toViewController, @(toViewController.view.tag));
+    }];
     
-    pageViewController.selectedIndex = 0;
+    pageViewController.selectedIndex = 10;
     
     [self presentViewController:pageViewController animated:YES completion:NULL];
 

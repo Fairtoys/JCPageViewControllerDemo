@@ -133,7 +133,7 @@
 @implementation JCPageScrollView
 
 - (instancetype)init{
-    return [self initWithOrientationType:JCPageScrollViewNavigationOrientationHorizontal];
+    return [self initWithOrientationType:JCPageScrollViewNavigationOrientationVertical];
 }
 
 - (instancetype)initWithOrientationType:(JCPageScrollViewNavigationOrientation)orientationType{
@@ -684,7 +684,7 @@ static const NSInteger kSelectedIdx = 1;
     return CGSizeMake(CGRectGetWidth(self.scrollView.frame), CGRectGetMaxY(self.scrollView.containerViews.lastObject.frame));
 }
 - (void)willChangeToSize:(CGSize)size{
-    self.scrollView.contentOffset = CGPointMake(0, size.height);
+    self.scrollView.contentOffset = CGPointMake(0, CGRectGetHeight(self.scrollView.frame));
 }
 
 @end
@@ -738,7 +738,7 @@ static const NSInteger kSelectedIdx = 1;
 }
 
 - (void)willChangeToSize:(CGSize)size{
-    self.scrollView.contentOffset = CGPointMake(size.width, 0);
+    self.scrollView.contentOffset = CGPointMake(CGRectGetWidth(self.scrollView.frame), 0);
 }
 
 @end

@@ -47,6 +47,7 @@
     [self.scrollView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.edges.equalTo(self.view);
     }];
+
 }
 
 - (void)viewWillAppear:(BOOL)animated{

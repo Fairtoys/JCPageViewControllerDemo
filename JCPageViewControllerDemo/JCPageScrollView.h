@@ -24,7 +24,7 @@ typedef NS_ENUM(NSUInteger, JCPageScrollViewNavigationOrientation) {
 };
 
 @interface JCPageScrollView : UIScrollView
-
+//init Default JCPageScrollViewNavigationOrientationVertical
 - (instancetype)initWithOrientationType:(JCPageScrollViewNavigationOrientation)orientationType;
 
 - (UIView *)containerViewAtIndex:(NSInteger)index;
