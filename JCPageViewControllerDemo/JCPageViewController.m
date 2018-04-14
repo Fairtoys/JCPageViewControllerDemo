@@ -116,6 +116,14 @@
     }
 }
 
+- (BOOL)isScrollEnabled{
+    return self.scrollView.isScrollEnabled;
+}
+
+- (void)setScrollEnabled:(BOOL)scrollEnabled{
+    self.scrollView.scrollEnabled = scrollEnabled;
+}
+
 - (JCPageScrollView *)scrollView{
     if (!_scrollView) {
         _scrollView = [[JCPageScrollView alloc] init];
@@ -241,12 +249,11 @@
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator{
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+    self.scrollView.transitioningOrientation = YES;
     [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
-        
-//        self.scrollView.contentOffset = CGPointMake(0, size.height);
         [self.scrollView willChangeToSize:size];
     } completion:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
-        
+        self.scrollView.transitioningOrientation = NO;
     }];
     
     [self.selectedViewController viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
@@ -257,6 +264,9 @@
 }
 
 - (BOOL)shouldAutorotate{
+    if (self.scrollView.isDecelerating || self.scrollView.isDragging || self.scrollView.isTracking) {
+        return NO;
+    }
     return [self.selectedViewController shouldAutorotate];
 }
 

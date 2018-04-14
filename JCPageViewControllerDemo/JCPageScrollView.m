@@ -167,6 +167,8 @@
 
 - (void)setupContainerViews{
     self.pagingEnabled = YES;
+    self.showsVerticalScrollIndicator = NO;
+    self.showsHorizontalScrollIndicator = NO;
     [self _resetData];
     [super setDelegate:self];
     [self.containerViews enumerateObjectsUsingBlock:^(UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -311,7 +313,6 @@ static const NSInteger kSelectedIdx = 1;
     }];
     
     if (self.setuped) {
-//        self.contentOffset = CGPointMake(0, CGRectGetHeight(self.frame));
         self.contentOffset = [self contentOffsetForSelectedView];
         self.contentInset = UIEdgeInsetsZero;
     }
@@ -360,7 +361,6 @@ static const NSInteger kSelectedIdx = 1;
 }
 
 - (void)setContentOffsetToSelectView{
-//    self.contentOffset = CGPointMake(0, CGRectGetHeight(self.frame));
     self.contentOffset = [self contentOffsetForSelectedView];
 }
 
@@ -372,9 +372,11 @@ static const NSInteger kSelectedIdx = 1;
         return;
     }
     
-    if ([self isShouldLoadAfterView]){
-//    if (scrollView.contentOffset.y > CGRectGetHeight(scrollView.frame)) {//加载下一个视图
+    if (self.isTransitioningOrientation) {
+        return;
+    }
     
+    if ([self isShouldLoadAfterView]){//加载下一个视图
         if (self.isNeedLoadAfterView) {
             self.needLoadAfterView = NO;
             if (self.viewAfterSelectedViewBlock) {
@@ -394,9 +396,7 @@ static const NSInteger kSelectedIdx = 1;
             }
 
         }
-//    }else if (scrollView.contentOffset.y < CGRectGetHeight(scrollView.frame)){//加载上一个视图
     }else if ([self isShouldLoadBeforeView]){//加载上一个视图
-        
         
         if (self.isNeedLoadBeforeView) {
             self.needLoadBeforeView = NO;
@@ -417,10 +417,7 @@ static const NSInteger kSelectedIdx = 1;
         }
         
     }
-    if ([self isShouldSetAfterViewToSelectedView]){
-//    if (scrollView.contentOffset.y >= CGRectGetHeight(scrollView.frame) * 2) {//上滑出了下一个
-    
-//        NSLog(@"滑出下一个");
+    if ([self isShouldSetAfterViewToSelectedView]){//上滑出了下一个
         self.needLoadAfterView = YES;
         self.needLoadBeforeView = NO;//因为上一个还在视图中，所以不需要加载新的视图
         self.transitionComplete = YES;
@@ -438,21 +435,14 @@ static const NSInteger kSelectedIdx = 1;
         
         _beforeView = nil;
         self.beforeView = self.selectedView;
-        
         _selectedView = nil;
         [self setSelectedView:self.afterView resetData:NO];
         if (self.viewDidTransitionBlock) {
             self.viewDidTransitionBlock(self, self.beforeView, self.selectedView);
         }
-        
-
-        
         _afterView = nil;
     }
-    
-//    if (scrollView.contentOffset.y <= 0) {//下拉出上一个
     if ([self isShouldSetBeforeViewToSelectedView]) {//下拉出上一个
-//        NSLog(@"下拉上一个");
         self.needLoadBeforeView = YES;
         self.needLoadAfterView = NO;//因为上一个还在视图中，所以不需要加载新的视图
         self.transitionComplete = YES;
@@ -477,9 +467,6 @@ static const NSInteger kSelectedIdx = 1;
         if (self.viewDidTransitionBlock) {
             self.viewDidTransitionBlock(self, self.afterView, self.selectedView);
         }
-        
-
-
         _beforeView = nil;
     }
     

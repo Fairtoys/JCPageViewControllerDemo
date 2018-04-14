@@ -29,6 +29,8 @@ typedef NS_ENUM(NSUInteger, JCPageViewControllerNavigationOrientation) {
 
 @property (nonatomic, strong) __kindof UIViewController *selectedViewController;//当前选中的ViewController
 
+@property (nonatomic, assign, getter = isScrollEnabled) BOOL scrollEnabled;//开启、关闭滑动
+
 @property (nonatomic, copy) JCPageViewControllerControllerGetBlock controllerBeforeSelectedViewControllerBlock;//获取当前controller之前的Controller的Block
 @property (nonatomic, copy) JCPageViewControllerControllerGetBlock controllerAfterSelectedViewControllerBlock;//获取当前controller之后的Controller的Block
 

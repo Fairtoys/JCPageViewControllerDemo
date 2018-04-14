@@ -56,6 +56,9 @@
 - (IBAction)onClickChangeScrollOrientationBtn:(id)sender {
     self.jc_thePageViewController.navigationOrientationType = (JCPageViewControllerNavigationOrientationHorizontal == self.jc_thePageViewController.navigationOrientationType ? JCPageViewControllerNavigationOrientationVertical : JCPageViewControllerNavigationOrientationHorizontal);
 }
+- (IBAction)onClickEnableScrollBtn:(id)sender {
+    self.jc_thePageViewController.scrollEnabled = !self.jc_thePageViewController.scrollEnabled;
+}
 
 //- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator{
 //    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
