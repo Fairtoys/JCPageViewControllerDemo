@@ -35,7 +35,9 @@ typedef NS_ENUM(NSUInteger, JCPageViewControllerNavigationOrientation) {
 @property (nonatomic, copy) JCPageViewControllerControllerGetBlock controllerAfterSelectedViewControllerBlock;//获取当前controller之后的Controller的Block
 
 @property (nonatomic, copy, nullable) JCPageViewControllerTransitionBlock controllerWillTransitionBlock;//Controller将要切换的回调
-@property (nonatomic, copy, nullable) JCPageViewControllerTransitionBlock controllerDidTransitionBlock;//Controller真的切换了才回调，如果滑动当前页，又放手，那么不会回调
+@property (nonatomic, copy, nullable) JCPageViewControllerTransitionBlock controllerDidTransitionBlock;//滑动过程中切换了Controller的回调
+
+@property (nonatomic, copy, nullable) JCPageViewControllerTransitionBlock controllerDidEndScrollTransitionBlock;//滑动停止了的回调
 
 - (void)setCanLoadBeforeAndAfterViewController;//可再次加载前一个和后一个,并清掉beforeViewController 和afterViewController
 
@@ -46,6 +48,7 @@ typedef NS_ENUM(NSUInteger, JCPageViewControllerNavigationOrientation) {
 
 @protocol JCPageViewControllerItemVC <NSObject>
 @property (nonatomic, readonly, nullable) __kindof JCPageViewController *jc_thePageViewController;//从当前中查找PageViewController
+@property (nonatomic, strong) NSString *jc_pageScrollViewControllerReuseIdentifier;
 @end
 
 @interface UIViewController (JCPageViewController) <JCPageViewControllerItemVC>

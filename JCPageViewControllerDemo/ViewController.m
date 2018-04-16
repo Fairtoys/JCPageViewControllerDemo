@@ -113,6 +113,10 @@
     [pageViewController setControllerDidTransitionBlock:^(__kindof JCPageViewController * _Nonnull thePageViewController, __kindof UIViewController * _Nonnull fromViewController, __kindof UIViewController * _Nonnull toViewController) {
         NSLog(@"did transition fromViewController%@ tag:%@ toViewController:%@, tag:%@", fromViewController,@(toViewController.view.tag), toViewController, @(toViewController.view.tag));
     }];
+    [pageViewController setControllerDidEndScrollTransitionBlock:^(__kindof JCPageViewController * _Nonnull thePageViewController, __kindof UIViewController * _Nonnull fromViewController, __kindof UIViewController * _Nonnull toViewController) {
+        NSLog(@"did scroll end transition fromViewController%@ tag:%@ toViewController:%@, tag:%@", fromViewController,@(toViewController.view.tag), toViewController, @(toViewController.view.tag));
+        NSLog(@"selected controller %@ tag:%@", thePageViewController.selectedViewController, @(thePageViewController.selectedViewController.view.tag));
+    }];
     
     pageViewController.selectedIndex = 10;
     

@@ -159,6 +159,10 @@
             UIViewController *toController = [weakSelf controllerForView:toView];
             [toController beginAppearanceTransition:YES animated:YES];
             [fromController beginAppearanceTransition:NO animated:YES];
+            //提供一个外部回调
+            if (weakSelf.controllerWillTransitionBlock) {
+                weakSelf.controllerWillTransitionBlock(weakSelf, fromController, toController);
+            }
         }];
         
         [_scrollView setViewDidTransitionBlock:^(__kindof JCPageScrollView * _Nonnull thePageScrollView, __kindof UIView * _Nonnull fromView, __kindof UIView * _Nonnull toView) {
@@ -175,9 +179,9 @@
 //            [toController endAppearanceTransition];//这个不需要了，因为在滚动停止时才需要调用此方法，但是上一个缺需要在此时调用此方法来触发viewDidDisappear方法
             [fromController endAppearanceTransition];
             
-            //提供一个外部回调
-            if (weakSelf.controllerWillTransitionBlock) {
-                weakSelf.controllerWillTransitionBlock(weakSelf, fromController, toController);
+            //真的发生了切换的回调
+            if (weakSelf.controllerDidTransitionBlock) {
+                weakSelf.controllerDidTransitionBlock(weakSelf, fromController, toController);
             }
             
         }];
@@ -191,11 +195,6 @@
             if (isTransitionComplete) {
                 //这里发生了切换，只需要调用完成方法来调用viewDidAppear
                 [toController endAppearanceTransition];
-                
-                //真的发生了切换的回调
-                if (weakSelf.controllerDidTransitionBlock) {
-                    weakSelf.controllerDidTransitionBlock(weakSelf, fromController, toController);
-                }
             }else{
                 //重新调用当前VC的viewWillAppear和viewDidAppear等
                 [toController beginAppearanceTransition:YES animated:YES];
@@ -204,6 +203,10 @@
                 [toController endAppearanceTransition]; //系统的是下一个的DidAppear先回调，再调用上一个的DidDisappear，这里我改成了先调上一个的DidDisapear,再调当前的DidAppear
             }
             
+            //真的发生了切换的回调
+            if (weakSelf.controllerDidEndScrollTransitionBlock) {
+                weakSelf.controllerDidEndScrollTransitionBlock(weakSelf, fromController, toController);
+            }
         }];
         
         //要移除掉该View对应的Controller
@@ -284,6 +287,14 @@
         parentViewController = parentViewController.parentViewController;
     }
     return (JCPageViewController *)parentViewController;
+}
+
+- (void)setJc_pageScrollViewControllerReuseIdentifier:(NSString *)jc_pageScrollViewControllerReuseIdentifier{
+    self.view.jc_pageScrollViewReuseIdentifier = jc_pageScrollViewControllerReuseIdentifier;
+}
+
+- (NSString *)jc_pageScrollViewControllerReuseIdentifier{
+    return self.view.jc_pageScrollViewReuseIdentifier;
 }
 @end
 
