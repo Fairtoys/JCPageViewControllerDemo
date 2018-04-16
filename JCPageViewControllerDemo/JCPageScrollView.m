@@ -243,11 +243,7 @@
 
 - (NSArray <UIView *> *)containerViews{
     if (!_containerViews) {
-        _containerViews = @[[[UIView alloc] init],[[UIView alloc] init],[[UIView alloc] init]].mutableCopy;
-        NSArray <UIColor *> *colors = @[[UIColor greenColor], [UIColor redColor], [UIColor yellowColor]];
-        [_containerViews enumerateObjectsUsingBlock:^(UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            obj.backgroundColor = colors[idx];
-        }];
+        _containerViews = @[[[UIView alloc] init],[[UIView alloc] init],[[UIView alloc] init]];
     }
     return _containerViews;
 }

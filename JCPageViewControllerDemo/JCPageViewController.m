@@ -47,7 +47,7 @@
     [self.scrollView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.edges.equalTo(self.view);
     }];
-
+    
 }
 
 - (void)viewWillAppear:(BOOL)animated{
@@ -92,25 +92,24 @@
          [self.viewControllerMap removeAllObjects];//移除所有的ViewController
     }
     
-    UIViewController *lastViewContorller = _selectedViewController;
     [self mapController:selectedViewController];
     if (reloadData) {
         [selectedViewController beginAppearanceTransition:YES animated:YES];
-        [lastViewContorller beginAppearanceTransition:NO animated:YES];
+        [_selectedViewController beginAppearanceTransition:NO animated:YES];
         [_selectedViewController willMoveToParentViewController:nil];
         [self addChildViewController:selectedViewController];
         self.scrollView.selectedView = selectedViewController.view;
+        [_selectedViewController endAppearanceTransition];
         [_selectedViewController removeFromParentViewController];
         
         self.needInvokeSelectVCAppearenceMethods = NO;
     }
     
-
     _selectedViewController = selectedViewController;
     
     if (reloadData) {
         [selectedViewController didMoveToParentViewController:self];
-        [lastViewContorller endAppearanceTransition];
+//        [lastViewContorller endAppearanceTransition];//这个要提到removeFromParentViewController之前，保证之前的ViewController可以取到ParentViewController
         [selectedViewController endAppearanceTransition]; //系统的是下一个的DidAppear先回调，再调用上一个的DidDisappear，这里我改成了先调上一个的DidDisapear,再调当前的DidAppear
         
     }
@@ -171,13 +170,14 @@
             UIViewController *toController = [weakSelf controllerForView:toView];
             
 
+            [fromController endAppearanceTransition];
             [fromController willMoveToParentViewController:nil];
             [weakSelf addChildViewController:toController];
             [fromController removeFromParentViewController];
             [weakSelf setSelectedViewController:toController reloadData:NO];
             [toController didMoveToParentViewController:weakSelf];
 //            [toController endAppearanceTransition];//这个不需要了，因为在滚动停止时才需要调用此方法，但是上一个缺需要在此时调用此方法来触发viewDidDisappear方法
-            [fromController endAppearanceTransition];
+//            [fromController endAppearanceTransition];//这个移动到上面，因为他已经在上面removeFromParentViewController了，所以放到下面的话，已经拿不到ParentViweController了
             
             //真的发生了切换的回调
             if (weakSelf.controllerDidTransitionBlock) {
