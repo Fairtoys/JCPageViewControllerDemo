@@ -8,6 +8,7 @@
 
 #import "ItemViewController.h"
 #import "JCPageViewController.h"
+#import "OverlayViewController.h"
 
 
 @interface ItemViewController ()
@@ -58,6 +59,10 @@
 }
 - (IBAction)onClickEnableScrollBtn:(id)sender {
     self.jc_thePageViewController.scrollEnabled = !self.jc_thePageViewController.scrollEnabled;
+}
+- (IBAction)onClickOverlayBtn:(id)sender {
+    OverlayViewController *vc = [[OverlayViewController alloc] init];
+    [self presentViewController:vc animated:YES completion:NULL];
 }
 
 //- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator{

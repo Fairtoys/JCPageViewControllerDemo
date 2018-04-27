@@ -18,7 +18,6 @@
 
 @property (nonatomic, assign, getter = isPageViewDidViewAppeared) BOOL pageViewDidViewAppeared;
 
-@property (nonatomic, assign, getter = isNeedInvokeSelectVCAppearenceMethods) BOOL needInvokeSelectVCAppearenceMethods;
 @end
 
 @implementation JCPageViewController
@@ -52,17 +51,12 @@
 
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
-    if (self.isNeedInvokeSelectVCAppearenceMethods) {
-        [self.selectedViewController beginAppearanceTransition:YES animated:animated];
-    }
-    
+    [self.selectedViewController beginAppearanceTransition:YES animated:animated];
 }
 - (void)viewDidAppear:(BOOL)animated{
     [super viewDidAppear:animated];
-    if (self.isNeedInvokeSelectVCAppearenceMethods) {
-        [self.selectedViewController endAppearanceTransition];
-    }
-    self.needInvokeSelectVCAppearenceMethods = YES;
+    [self.selectedViewController endAppearanceTransition];
+    self.pageViewDidViewAppeared = YES;
 }
 
 - (void)viewWillDisappear:(BOOL)animated{
@@ -73,6 +67,7 @@
 - (void)viewDidDisappear:(BOOL)animated{
     [super viewDidDisappear:animated];
     [self.selectedViewController endAppearanceTransition];
+    self.pageViewDidViewAppeared = NO;
 }
 
 - (UIViewController *)dequeueReusableViewControllerWithIdentifier:(NSString *)identifier{
@@ -94,23 +89,27 @@
     
     [self mapController:selectedViewController];
     if (reloadData) {
-        [selectedViewController beginAppearanceTransition:YES animated:YES];
-        [_selectedViewController beginAppearanceTransition:NO animated:YES];
+        if (self.isPageViewDidViewAppeared) {
+            [selectedViewController beginAppearanceTransition:YES animated:YES];
+            [_selectedViewController beginAppearanceTransition:NO animated:YES];
+        }
         [_selectedViewController willMoveToParentViewController:nil];
         [self addChildViewController:selectedViewController];
         self.scrollView.selectedView = selectedViewController.view;
-        [_selectedViewController endAppearanceTransition];
+        if (self.isPageViewDidViewAppeared) {
+            [_selectedViewController endAppearanceTransition];
+        }
         [_selectedViewController removeFromParentViewController];
-        
-        self.needInvokeSelectVCAppearenceMethods = NO;
     }
     
     _selectedViewController = selectedViewController;
     
     if (reloadData) {
         [selectedViewController didMoveToParentViewController:self];
-//        [lastViewContorller endAppearanceTransition];//这个要提到removeFromParentViewController之前，保证之前的ViewController可以取到ParentViewController
-        [selectedViewController endAppearanceTransition]; //系统的是下一个的DidAppear先回调，再调用上一个的DidDisappear，这里我改成了先调上一个的DidDisapear,再调当前的DidAppear
+        if (self.isPageViewDidViewAppeared) {
+            //        [lastViewContorller endAppearanceTransition];//这个要提到removeFromParentViewController之前，保证之前的ViewController可以取到ParentViewController
+            [selectedViewController endAppearanceTransition]; //系统的是下一个的DidAppear先回调，再调用上一个的DidDisappear，这里我改成了先调上一个的DidDisapear,再调当前的DidAppear
+        }
         
     }
 }
@@ -167,9 +166,13 @@
         [_scrollView setTransitionViewDidChangeBlock:^(__kindof JCPageScrollView * _Nonnull thePageScrollView, __kindof UIView * _Nonnull fromView, __kindof UIView * _Nonnull toView) {
             UIViewController *fromController = [weakSelf controllerForView:fromView];
             UIViewController *toController = [weakSelf controllerForView:toView];
+            [toController beginAppearanceTransition:YES animated:YES];
             [fromController beginAppearanceTransition:NO animated:YES];
             [fromController endAppearanceTransition];
-            [toController beginAppearanceTransition:YES animated:YES];
+            //提供一个外部回调
+            if (weakSelf.controllerWillTransitionBlock) {
+                weakSelf.controllerWillTransitionBlock(weakSelf, weakSelf.selectedViewController, toController);
+            }
         }];
         
         [_scrollView setViewDidTransitionBlock:^(__kindof JCPageScrollView * _Nonnull thePageScrollView, __kindof UIView * _Nonnull fromView, __kindof UIView * _Nonnull toView) {
@@ -266,8 +269,6 @@
     } completion:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
         self.scrollView.transitioningOrientation = NO;
     }];
-    
-    [self.selectedViewController viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations{

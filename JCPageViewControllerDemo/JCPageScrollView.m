@@ -164,6 +164,11 @@
 - (void)setDelegate:(id<UIScrollViewDelegate>)delegate{
     self.theDelegate = delegate;
 }
+- (void)dealloc
+{
+    _theDelegate = nil;
+    [super setDelegate:nil];
+}
 
 - (void)setupContainerViews{
     self.pagingEnabled = YES;
@@ -194,24 +199,14 @@
 }
 
 - (void)setCanLoadBeforeAndAfterView{
-    _needLoadAfterView = YES;
-    _needLoadBeforeView = YES;
     
+    if (!_beforeView) {
+        _needLoadBeforeView = YES;
+    }
+    if (!_afterView) {
+        _needLoadAfterView = YES;
+    }
     self.contentInset = UIEdgeInsetsZero;
-    if (_beforeView) {
-        if (self.viewDidRemoveFromSuperViewBlock) {
-            self.viewDidRemoveFromSuperViewBlock(self, _beforeView);
-        }
-        self.beforeView = nil;
-    }
-    
-    if (_afterView) {
-        if (self.viewDidRemoveFromSuperViewBlock) {
-            self.viewDidRemoveFromSuperViewBlock(self, _afterView);
-        }
-        self.afterView = nil;
-    }
-    
 }
 
 - (void)setNavigationOrientationType:(JCPageScrollViewNavigationOrientation)navigationOrientationType{
@@ -335,7 +330,9 @@ static const NSInteger kSelectedIdx = 1;
     self.needLoadBeforeView = YES;
     self.transitionComplete = YES;
     self.transitioningView = nil;
+    [self _cacheOrRemoveView:_beforeView];
     self.beforeView = nil;
+    [self _cacheOrRemoveView:_afterView];
     self.afterView = nil;
 }
 
@@ -389,7 +386,6 @@ static const NSInteger kSelectedIdx = 1;
             self.needLoadAfterView = NO;
             if (self.viewAfterSelectedViewBlock) {
                 self.afterView = self.viewAfterSelectedViewBlock(self, self.selectedView);
-                
             }
             [self _setContentInsetByBeforeAndAfterView];
         }
@@ -415,7 +411,6 @@ static const NSInteger kSelectedIdx = 1;
             }
             [self _setContentInsetByBeforeAndAfterView];
         }
-        
         if (self.beforeView) {
             if (self.isTransitionComplete) {//调用一次就不调了
                 self.transitionComplete = NO;
@@ -437,19 +432,14 @@ static const NSInteger kSelectedIdx = 1;
         [_afterView removeFromSuperview];
         [_beforeView removeFromSuperview];
         [_selectedView removeFromSuperview];
-
-        BOOL needCache = [self _cacheViewIfNeedForReuse:_beforeView];
-        if (!needCache) {
-            //AfterView不需要了，移除
-            if (self.viewDidRemoveFromSuperViewBlock) {
-                self.viewDidRemoveFromSuperViewBlock(self, _beforeView);
-            }
-        }
+        
+        [self _cacheOrRemoveView:_beforeView];//判断是否需要缓存，不需要则直接移除
         
         _beforeView = nil;
         self.beforeView = self.selectedView;
         _selectedView = nil;
         [self setSelectedView:self.afterView resetData:NO];
+        
         if (self.viewDidTransitionBlock) {
             self.viewDidTransitionBlock(self, self.beforeView, self.selectedView);
         }
@@ -463,17 +453,10 @@ static const NSInteger kSelectedIdx = 1;
         [_selectedView removeFromSuperview];
         [_afterView removeFromSuperview];
         
-        BOOL needCache = [self _cacheViewIfNeedForReuse:_afterView];
-        if (!needCache) {
-            //BeforeView不需要了，移除
-            if (self.viewDidRemoveFromSuperViewBlock) {
-                self.viewDidRemoveFromSuperViewBlock(self, _afterView);
-            }
-        }
+        [self _cacheOrRemoveView:_afterView];//判断是否需要缓存，不需要则直接移除
         
         _afterView = nil;
         self.afterView = self.selectedView;
-        
         _selectedView = nil;
         [self setSelectedView:self.beforeView resetData:NO];
         
@@ -489,6 +472,9 @@ static const NSInteger kSelectedIdx = 1;
 }
 
 - (BOOL)_cacheViewIfNeedForReuse:(UIView *)view{
+    if (!view) {
+        return NO;
+    }
     NSString *identifier = view.jc_pageScrollViewReuseIdentifier;
     if (!identifier.length) {
         return NO;
@@ -503,6 +489,17 @@ static const NSInteger kSelectedIdx = 1;
     [views addObject:view];
     return YES;
 }
+
+- (void)_cacheOrRemoveView:(UIView *)view{
+    BOOL needCache = [self _cacheViewIfNeedForReuse:view];
+    if (!needCache) {
+        //AfterView不需要了，移除
+        if (self.viewDidRemoveFromSuperViewBlock) {
+            self.viewDidRemoveFromSuperViewBlock(self, view);
+        }
+    }
+}
+
 #pragma mark - orientation methods start
 - (void)setContainerViewsFrame:(UIView *)obj idx:(NSUInteger)idx{
     [self.orientation setContainerViewsFrame:obj idx:idx];
@@ -543,7 +540,6 @@ static const NSInteger kSelectedIdx = 1;
 #pragma mark - orientation methods end
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView{
-    
     if (self.scrollDidEndBlock) {
         self.scrollDidEndBlock(self, self.transitioningView, self.selectedView, self.isTransitionComplete);
     }
@@ -568,7 +564,7 @@ static const NSInteger kSelectedIdx = 1;
     if ([self.theDelegate respondsToSelector:_cmd]) {
         [self.theDelegate scrollViewDidZoom:scrollView];
     }
-
+    
 }
 
 // called on start of dragging (may require some time and or distance to move)
@@ -600,7 +596,7 @@ static const NSInteger kSelectedIdx = 1;
 
 - (nullable UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView{
     if ([self.theDelegate respondsToSelector:_cmd]) {
-       return [self.theDelegate viewForZoomingInScrollView:scrollView];
+        return [self.theDelegate viewForZoomingInScrollView:scrollView];
     }
     return nil;
 }
