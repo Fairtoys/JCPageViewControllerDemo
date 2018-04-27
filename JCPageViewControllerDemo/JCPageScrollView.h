@@ -38,6 +38,7 @@ typedef NS_ENUM(NSUInteger, JCPageScrollViewNavigationOrientation) {
 
 @property (nonatomic, copy, nullable) JCPageScrollViewViewTransitionBlock viewWillTransitionBlock;//视图开始发生切换时的回调
 @property (nonatomic, copy, nullable) JCPageScrollViewViewTransitionBlock viewDidTransitionBlock;//视图切换后的回调
+@property (nonatomic, copy, nullable) JCPageScrollViewViewTransitionBlock transitionViewDidChangeBlock;//视图切换后的回调
 
 @property (nonatomic, copy, nullable) JCPageScrollViewViewTransitionEndBlock scrollDidEndBlock;//滚动停止的回调
 

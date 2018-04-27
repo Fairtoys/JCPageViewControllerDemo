@@ -318,6 +318,18 @@ static const NSInteger kSelectedIdx = 1;
     }
 }
 
+- (void)setTransitioningViewAndCallback:(UIView *)transitioningView{
+    if (_transitioningView == transitioningView) {
+        return ;
+    }
+    UIView *lastTransitionView = _transitioningView;
+    _transitioningView = transitioningView;
+    if (self.transitionViewDidChangeBlock) {
+        self.transitionViewDidChangeBlock(self, lastTransitionView, transitioningView);
+    }
+    
+}
+
 - (void)_resetData{
     self.needLoadAfterView = YES;
     self.needLoadBeforeView = YES;
@@ -389,8 +401,10 @@ static const NSInteger kSelectedIdx = 1;
                 if (self.viewWillTransitionBlock) {
                     self.viewWillTransitionBlock(self, self.selectedView, self.afterView);
                 }
+                return ;
             }
-
+            
+            [self setTransitioningViewAndCallback:self.afterView];
         }
     }else if ([self isShouldLoadBeforeView]){//加载上一个视图
         
@@ -409,7 +423,10 @@ static const NSInteger kSelectedIdx = 1;
                 if (self.viewWillTransitionBlock) {
                     self.viewWillTransitionBlock(self, self.selectedView, self.beforeView);
                 }
+                return ;
             }
+            
+            [self setTransitioningViewAndCallback:self.beforeView];
         }
         
     }

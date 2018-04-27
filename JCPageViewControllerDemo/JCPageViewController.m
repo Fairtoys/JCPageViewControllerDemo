@@ -164,6 +164,14 @@
             }
         }];
         
+        [_scrollView setTransitionViewDidChangeBlock:^(__kindof JCPageScrollView * _Nonnull thePageScrollView, __kindof UIView * _Nonnull fromView, __kindof UIView * _Nonnull toView) {
+            UIViewController *fromController = [weakSelf controllerForView:fromView];
+            UIViewController *toController = [weakSelf controllerForView:toView];
+            [fromController beginAppearanceTransition:NO animated:YES];
+            [fromController endAppearanceTransition];
+            [toController beginAppearanceTransition:YES animated:YES];
+        }];
+        
         [_scrollView setViewDidTransitionBlock:^(__kindof JCPageScrollView * _Nonnull thePageScrollView, __kindof UIView * _Nonnull fromView, __kindof UIView * _Nonnull toView) {
             
             UIViewController *fromController = [weakSelf controllerForView:fromView];
