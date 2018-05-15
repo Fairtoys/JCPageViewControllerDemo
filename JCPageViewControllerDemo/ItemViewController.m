@@ -59,6 +59,10 @@
 }
 - (IBAction)onClickEnableScrollBtn:(id)sender {
     self.jc_thePageViewController.scrollEnabled = !self.jc_thePageViewController.scrollEnabled;
+//    [self.jc_thePageViewController setCanScrollBlock:^BOOL(__kindof JCPageViewController * _Nonnull thePageViewController) {
+//        return NO;
+//    }];
+    
 }
 - (IBAction)onClickOverlayBtn:(id)sender {
     OverlayViewController *vc = [[OverlayViewController alloc] init];

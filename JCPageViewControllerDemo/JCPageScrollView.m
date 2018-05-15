@@ -27,7 +27,6 @@
 - (UIEdgeInsets)contentInsetForNoBeforeAndAfterView;
 - (BOOL)isShouldSetBeforeViewToSelectedView;
 - (BOOL)isShouldSetAfterViewToSelectedView;
-- (void)willChangeToSize:(CGSize)size;
 @end
 
 
@@ -76,9 +75,6 @@
 - (CGSize)contentSize{
     return CGSizeZero;
 }
-- (void)willChangeToSize:(CGSize)size{
-    
-}
 
 @end
 
@@ -94,7 +90,7 @@
 
 
 
-@interface JCPageScrollView () <UIScrollViewDelegate>
+@interface JCPageScrollView () <UIScrollViewDelegate, UIGestureRecognizerDelegate>
 
 @property (nonatomic, strong) NSArray <UIView *> *containerViews;//有三个视图容器，初始化ScrollView时就创建好
 
@@ -112,8 +108,6 @@
 
 @property (nonatomic, strong, nullable) UIView *beforeView;
 @property (nonatomic, strong, nullable) UIView *afterView;
-
-@property (nonatomic, assign) BOOL setuped;//用来判断是否初始化过ScrollView的offset了，只有创建ScrollView的时候才有用，一次性属性
 
 @property (nonatomic, weak, nullable) UIView *transitioningView;//当前正在切换的视图
 
@@ -179,19 +173,38 @@
     [self.containerViews enumerateObjectsUsingBlock:^(UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [self addSubview:obj];
     }];
+    
+    self.panGestureRecognizer.delegate = self;
 }
 
-- (void)layoutSubviews{
+- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer{
+    if(self.canScrollBlock){
+        return self.canScrollBlock(self);
+    }
+    return YES;
+}
+
+- (void)setBounds:(CGRect)bounds{
+    CGRect lastBounds = self.bounds;
+    [super setBounds:bounds];
+    if(!CGSizeEqualToSize(lastBounds.size, bounds.size)){
+        [self _reSetContentSizeAndLayout];
+    }
+}
+
+- (void)_reSetContentSizeAndLayout{
+    CGSize lastContentSize = self.contentSize;
+    CGSize contentSize = [self theContentSize];
+    if(CGSizeEqualToSize(lastContentSize, contentSize)){
+        return ;
+    }
+    
     [self.containerViews enumerateObjectsUsingBlock:^(UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [self setContainerViewsFrame:obj idx:idx];
     }];
-    CGSize contentSize = [self theContentSize];
-    self.contentSize = contentSize;
     
-    if (!self.setuped) {
-        self.setuped = YES;
-        self.contentOffset = [self contentOffsetForSelectedView];
-    }
+    self.contentSize = contentSize;
+    self.contentOffset = [self contentOffsetForSelectedView];
 }
 
 - (void)setCanLoadBeforeAndAfterView{
@@ -226,10 +239,9 @@
     }
     _orientation = orientation;
     
-    self.setuped = NO;//在layout的时候重新设置contentOffset
     [_orientation setAlwaysBounce];
     [self _setContentInsetByBeforeAndAfterView];
-    [self setNeedsLayout];
+    [self _reSetContentSizeAndLayout];
 }
 
 - (NSArray <UIView *> *)containerViews{
@@ -299,10 +311,8 @@ static const NSInteger kSelectedIdx = 1;
         make.edges.equalTo(self.selectedViewContainerView);
     }];
     
-    if (self.setuped) {
-        self.contentOffset = [self contentOffsetForSelectedView];
-        self.contentInset = UIEdgeInsetsZero;
-    }
+    self.contentOffset = [self contentOffsetForSelectedView];
+    self.contentInset = UIEdgeInsetsZero;
     
     if (resetData) {
         [self _resetData];
@@ -522,9 +532,6 @@ static const NSInteger kSelectedIdx = 1;
 - (CGSize)theContentSize{
     return [self.orientation contentSize];
 }
-- (void)willChangeToSize:(CGSize)size{
-    [self.orientation willChangeToSize:size];
-}
 
 #pragma mark - orientation methods end
 
@@ -667,10 +674,7 @@ static const NSInteger kSelectedIdx = 1;
     return self.scrollView.contentOffset.y >= CGRectGetHeight(self.scrollView.frame) * 2;
 }
 - (CGSize)contentSize{
-    return CGSizeMake(CGRectGetWidth(self.scrollView.frame), CGRectGetMaxY(self.scrollView.containerViews.lastObject.frame));
-}
-- (void)willChangeToSize:(CGSize)size{
-    self.scrollView.contentOffset = CGPointMake(0, CGRectGetHeight(self.scrollView.frame));
+    return CGSizeMake(CGRectGetWidth(self.scrollView.frame), CGRectGetHeight(self.scrollView.frame) * self.scrollView.containerViews.count);
 }
 
 @end
@@ -720,11 +724,7 @@ static const NSInteger kSelectedIdx = 1;
     return self.scrollView.contentOffset.x >= CGRectGetWidth(self.scrollView.frame) * 2;
 }
 - (CGSize)contentSize{
-    return CGSizeMake(CGRectGetMaxX(self.scrollView.containerViews.lastObject.frame), CGRectGetHeight(self.scrollView.frame));
-}
-
-- (void)willChangeToSize:(CGSize)size{
-    self.scrollView.contentOffset = CGPointMake(CGRectGetWidth(self.scrollView.frame), 0);
+    return CGSizeMake( CGRectGetWidth(self.scrollView.frame) * self.scrollView.containerViews.count, CGRectGetHeight(self.scrollView.frame));
 }
 
 @end

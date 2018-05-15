@@ -224,6 +224,13 @@
         [_scrollView setViewDidRemoveFromSuperViewBlock:^(__kindof JCPageScrollView * _Nonnull thePageScrollView, __kindof UIView * _Nonnull selectedView) {
             [weakSelf removeViewControllerForView:selectedView];
         }];
+        
+        [_scrollView setCanScrollBlock:^BOOL(__kindof JCPageScrollView * _Nonnull thePageScrollView) {
+            if(weakSelf.canScrollBlock){
+                return weakSelf.canScrollBlock(weakSelf);
+            }
+            return YES;
+        }];
 
         
     }
@@ -259,14 +266,6 @@
 
 - (void)onScrollViewPan:(UIPanGestureRecognizer *)panGes{
     
-}
-
-- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator{
-    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
-    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
-        [self.scrollView willChangeToSize:size];
-    } completion:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
-    }];
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations{

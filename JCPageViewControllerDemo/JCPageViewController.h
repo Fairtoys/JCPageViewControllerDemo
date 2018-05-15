@@ -16,6 +16,8 @@ NS_ASSUME_NONNULL_BEGIN
 typedef  UIViewController * _Nullable  (^JCPageViewControllerControllerGetBlock)(__kindof JCPageViewController *thePageViewController, __kindof UIViewController *selectedViewController);
 typedef  void (^JCPageViewControllerTransitionBlock)(__kindof JCPageViewController *thePageViewController, __kindof UIViewController *fromViewController, __kindof UIViewController *toViewController);
 
+typedef BOOL(^JCPageViewControllerCanScrollBlock)(__kindof JCPageViewController *thePageViewController);
+
 typedef NS_ENUM(NSUInteger, JCPageViewControllerNavigationOrientation) {
     JCPageViewControllerNavigationOrientationHorizontal = 0,
     JCPageViewControllerNavigationOrientationVertical = 1
@@ -38,6 +40,8 @@ typedef NS_ENUM(NSUInteger, JCPageViewControllerNavigationOrientation) {
 @property (nonatomic, copy, nullable) JCPageViewControllerTransitionBlock controllerDidTransitionBlock;//滑动过程中切换了Controller的回调
 
 @property (nonatomic, copy, nullable) JCPageViewControllerTransitionBlock controllerDidEndScrollTransitionBlock;//滑动停止了的回调
+
+@property (nonatomic, copy, nullable) JCPageViewControllerCanScrollBlock canScrollBlock;//滑动是否可以的回调
 
 - (void)setCanLoadBeforeAndAfterViewController;//可再次加载前一个和后一个,并清掉beforeViewController 和afterViewController
 

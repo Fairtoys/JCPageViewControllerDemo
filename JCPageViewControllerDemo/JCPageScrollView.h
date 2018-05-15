@@ -16,7 +16,7 @@ typedef  UIView * _Nullable  (^JCPageScrollViewGetViewBlock)(__kindof JCPageScro
 typedef void(^JCPageScrollViewAppearanceBlock)(__kindof JCPageScrollView *thePageScrollView, __kindof UIView *selectedView);
 typedef void(^JCPageScrollViewViewTransitionBlock)(__kindof JCPageScrollView *thePageScrollView,__kindof UIView *fromView,__kindof UIView *toView);
 typedef void(^JCPageScrollViewViewTransitionEndBlock)(__kindof JCPageScrollView *thePageScrollView, __kindof UIView * _Nullable fromView,__kindof UIView *toView, BOOL isTransitionComplete);
-
+typedef BOOL(^JCPageScrollViewCanScrollBlock)(__kindof JCPageScrollView *thePageScrollView);
 
 typedef NS_ENUM(NSUInteger, JCPageScrollViewNavigationOrientation) {
     JCPageScrollViewNavigationOrientationHorizontal = 0,
@@ -44,6 +44,8 @@ typedef NS_ENUM(NSUInteger, JCPageScrollViewNavigationOrientation) {
 
 @property (nonatomic, copy, nullable) JCPageScrollViewAppearanceBlock viewDidRemoveFromSuperViewBlock;//当视图划走移除之后的回调
 
+@property (nonatomic, copy, nullable) JCPageScrollViewCanScrollBlock canScrollBlock;//是否可以滑动的回调
+
 - (void)setContentOffsetToSelectView;//设置Offset到SelectView的位置
 
 - (void)setCanLoadBeforeAndAfterView;//将needLoadBefore 和needLoadAfter字段都设为YES，方便下次加载新View,并清清掉beforeView和afterView
@@ -51,8 +53,7 @@ typedef NS_ENUM(NSUInteger, JCPageScrollViewNavigationOrientation) {
 #pragma mark - 重用机制
 
 - (nullable __kindof UIView *)dequeueReusableViewWithIdentifier:(NSString *)identifier;//从缓存中取出一个ViewController
-#pragma mark 转屏使用
-- (void)willChangeToSize:(CGSize)size;
+
 @end
 
 @interface UIView (JCPageScrollView)
