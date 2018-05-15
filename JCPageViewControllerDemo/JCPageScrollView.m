@@ -126,7 +126,7 @@
 
 @property (nonatomic, strong) NSMutableDictionary <NSString *, NSMutableSet <UIView *> *> * reusableViews;
 
-@property (nonatomic, assign, getter = isLayoutContainerViewsOnly) BOOL layoutContainerViewsOnly;
+@property (nonatomic, assign, getter = isNeedTriggerScrollCallbacks) BOOL needTriggerScrollCallbacks;//有拖动的时候设为YES，滑动停止设为NO
 
 @end
 
@@ -185,11 +185,7 @@
     [self.containerViews enumerateObjectsUsingBlock:^(UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [self setContainerViewsFrame:obj idx:idx];
     }];
-    CGSize lastContentSize = self.contentSize;
     CGSize contentSize = [self theContentSize];
-    if (!CGSizeEqualToSize(lastContentSize, contentSize)) {
-        self.layoutContainerViewsOnly = YES;
-    }
     self.contentSize = contentSize;
     
     if (!self.setuped) {
@@ -371,16 +367,9 @@ static const NSInteger kSelectedIdx = 1;
 
 #pragma mark - ScrollViewDelegate
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView{
-    
-    if (self.isLayoutContainerViewsOnly) {
-        self.layoutContainerViewsOnly = NO;
-        return;
+    if(!self.isNeedTriggerScrollCallbacks){//只有拖动手势开始时才需要触发这些回调
+        return ;
     }
-    
-    if (self.isTransitioningOrientation) {
-        return;
-    }
-    
     if ([self isShouldLoadAfterView]){//加载下一个视图
         if (self.isNeedLoadAfterView) {
             self.needLoadAfterView = NO;
@@ -545,7 +534,7 @@ static const NSInteger kSelectedIdx = 1;
     }
     self.transitionComplete = YES;
     self.transitioningView = nil;
-    
+    self.needTriggerScrollCallbacks = NO;
     if ([self.theDelegate respondsToSelector:_cmd]) {
         [self.theDelegate scrollViewDidEndDecelerating:scrollView];
     }
@@ -569,6 +558,7 @@ static const NSInteger kSelectedIdx = 1;
 
 // called on start of dragging (may require some time and or distance to move)
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView{
+    self.needTriggerScrollCallbacks = YES;
     if ([self.theDelegate respondsToSelector:_cmd]) {
         [self.theDelegate scrollViewWillBeginDragging:scrollView];
     }

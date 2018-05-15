@@ -53,7 +53,6 @@ typedef NS_ENUM(NSUInteger, JCPageScrollViewNavigationOrientation) {
 - (nullable __kindof UIView *)dequeueReusableViewWithIdentifier:(NSString *)identifier;//从缓存中取出一个ViewController
 #pragma mark 转屏使用
 - (void)willChangeToSize:(CGSize)size;
-@property (nonatomic, assign, getter = isTransitioningOrientation) BOOL transitioningOrientation;//如果为YES，则会禁掉scrollViewDidScroll回调
 @end
 
 @interface UIView (JCPageScrollView)
