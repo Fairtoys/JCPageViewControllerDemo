@@ -165,7 +165,6 @@
 }
 
 - (void)setupContainerViews{
-    self.pagingEnabled = YES;
     self.showsVerticalScrollIndicator = NO;
     self.showsHorizontalScrollIndicator = NO;
     [self _resetData];
@@ -545,6 +544,7 @@ static const NSInteger kSelectedIdx = 1;
     if ([self.theDelegate respondsToSelector:_cmd]) {
         [self.theDelegate scrollViewDidEndDecelerating:scrollView];
     }
+    self.pagingEnabled = NO;
 }
 
 // called on finger up if the user dragged. decelerate is true if it will continue moving afterwards
@@ -565,6 +565,7 @@ static const NSInteger kSelectedIdx = 1;
 
 // called on start of dragging (may require some time and or distance to move)
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView{
+    self.pagingEnabled = YES;
     self.needTriggerScrollCallbacks = YES;
     if ([self.theDelegate respondsToSelector:_cmd]) {
         [self.theDelegate scrollViewWillBeginDragging:scrollView];
