@@ -167,6 +167,7 @@
 - (void)setupContainerViews{
     self.showsVerticalScrollIndicator = NO;
     self.showsHorizontalScrollIndicator = NO;
+    self.decelerationRate = UIScrollViewDecelerationRateFast;
     [self _resetData];
     [super setDelegate:self];
     [self.containerViews enumerateObjectsUsingBlock:^(UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {

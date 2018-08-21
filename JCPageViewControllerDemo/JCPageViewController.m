@@ -84,7 +84,12 @@
 - (void)setSelectedViewController:(__kindof UIViewController *)selectedViewController reloadData:(BOOL)reloadData{
     
     if (reloadData) {
-         [self.viewControllerMap removeAllObjects];//移除所有的ViewController
+        NSDictionary <NSNumber *,UIViewController *> *viewControllerMap = self.viewControllerMap.copy;
+        [viewControllerMap enumerateKeysAndObjectsUsingBlock:^(NSNumber * _Nonnull key, UIViewController * _Nonnull obj, BOOL * _Nonnull stop) {
+            if (!obj.jc_pageScrollViewControllerReuseIdentifier.length) {
+                [self.viewControllerMap removeObjectForKey:key];//移除没有重用标志的所有ViewController
+            }
+        }];
     }
     
     [self mapController:selectedViewController];
